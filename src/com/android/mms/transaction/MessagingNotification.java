@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 Esmertec AG.
+ * Copyright (C) 2008 Esmertec AG. 
  * Copyright (C) 2008 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -971,6 +971,24 @@ public class MessagingNotification {
         noti.setDeleteIntent(PendingIntent.getBroadcast(context, 0,
                 sNotificationOnDeleteIntent, 0));
 
+        // See if QuickMessage pop-up support is enabled in preferences
+        boolean qmPopupEnabled = MessagingPreferenceActivity.getQuickMessageEnabled(context);
+
+        // Set up the QuickMessage intent
+        Intent qmIntent = null;
+        if (mostRecentNotification.mIsSms) {
+            // QuickMessage support is only for SMS
+            qmIntent = new Intent();
+            qmIntent.setClass(context, QuickMessage.class);
+            qmIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP |
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            qmIntent.putExtra(QuickMessage.SMS_FROM_NAME_EXTRA, mostRecentNotification.mSender.getName());
+            qmIntent.putExtra(QuickMessage.SMS_FROM_NUMBER_EXTRA, mostRecentNotification.mSender.getNumber());
+            qmIntent.putExtra(QuickMessage.SMS_NOTIFICATION_OBJECT_EXTRA, mostRecentNotification);
+            qmIntent.putExtra(QuickMessage.SMS_NOTIFICATION_ID_EXTRA, NOTIFICATION_ID);
+        }
+
+        // Start getting the notification ready
         final Notification notification;
 
         if (messageCount == 1 || uniqueThreadCount == 1) {
