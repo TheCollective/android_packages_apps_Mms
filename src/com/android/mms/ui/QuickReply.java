@@ -31,9 +31,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.KeyguardManager;
 import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
+//import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.content.DialogInterface.OnDismissListener;
@@ -90,10 +93,15 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
     private KeyguardManager.KeyguardLock kl;
     private boolean typing;
     private boolean wasLocked = false;
+    //private boolean fromMulti = false;
+    private boolean screenIsOff;
+
 
     private AlertDialog mSmileyDialog;
-    private AlertDialog mEmojiDialog;
-    private View mEmojiView;
+    //private AlertDialog mEmojiDialog;
+    //private View mEmojiView;
+
+    private AlertDialog alert;
 
     private static final int NOTIFICATION_ID = 123;
 
@@ -108,9 +116,16 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
 
         kl = km.newKeyguardLock("QuickReply");
 
+        // make a BR for finding if the screen is on or off to help with
+        // how onPause is handled to work more fluid
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(Intent.ACTION_SCREEN_ON);
+        registerReceiver(screenReceiver, filter);
+
         LayoutInflater inflater = LayoutInflater.from(this);
         final View mView = inflater.inflate(R.layout.quick_reply_sms, null);
-        AlertDialog alert = new AlertDialog.Builder(this).setView(mView).create();
+        alert = new AlertDialog.Builder(this).setView(mView).create();
 
         Bundle extras = getIntent().getExtras();
         avatar = (Bitmap) extras.get("avatar");
@@ -153,6 +168,19 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
         }
         alert.show();
     }
+
+    private BroadcastReceiver screenReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+
+            if (Intent.ACTION_SCREEN_ON.equals(action)) {
+                screenIsOff = false;
+            } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+                screenIsOff = true;
+            }
+        }
+    };
 
     private Drawable getConactAvatar(Bitmap bitmap) {
         Drawable icon;
@@ -295,8 +323,31 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
         if (wasLocked) {
             kl.reenableKeyguard();
         }
+        if (fromMulti) {
+            Intent i = new Intent();
+            i.setClass(mContext, com.android.mms.ui.QuickReplyMulti.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(i);
+        }
+        unregisterReceiver(screenReceiver);
         finish();
         super.onDestroy();
+    }
+
+    // fix home button issue by pausing the activity dismissing the alert
+    @Override
+    protected void onPause() {
+        KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+        boolean isLocked = km.inKeyguardRestrictedInputMode();
+
+        if (!isLocked) {
+            if (!screenIsOff) {
+                finish();
+            }
+        }
+        super.onPause();
     }
 
     @Override
