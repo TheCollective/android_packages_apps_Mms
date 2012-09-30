@@ -114,7 +114,7 @@ public class LogTag {
             activity.runOnUiThread(new Runnable() {
                 public void run() {
                     new AlertDialog.Builder(activity)
-                        .setIconAttribute(android.R.attr.alertDialogIcon)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
                         .setTitle(R.string.error_state)
                         .setMessage(msg + "\n\n" + activity.getString(R.string.error_state_text))
                         .setPositiveButton(R.string.yes, new OnClickListener() {

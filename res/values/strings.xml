@@ -3,7 +3,6 @@
 /*
  * Copyright (C) 2007-2008 Esmertec AG.
  * Copyright (C) 2007-2008 The Android Open Source Project
- * QuickMessage: Copyright (C) 2012 The CyanogenMod Project (DvTonder)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +48,7 @@
     <!-- Context menu item on an individual conversation for viewing that conversation -->
     <string name="menu_view">View thread</string>
     <!-- Menu item for debugging - do not localize -->
-    <string name="menu_debug_dump" translatable="false">DEBUG DUMP</string>
+    <string name="menu_debug_dump">DEBUG DUMP</string>
     <!-- Message that appears on screen while SIM card messages are retrieved -->
     <string name="refreshing">Refreshing\u2026</string>
 
@@ -365,14 +364,14 @@
     </string-array>
 
     <!-- The default vibrateWhen value, when none is set -->
-    <string name="prefDefault_vibrateWhen" translatable="false">never</string>
+    <string translatable="false" name="prefDefault_vibrateWhen">never</string>
     <!-- The value to use when migrating from old versions for a true vibrate setting -->
-    <string name="prefDefault_vibrate_true" translatable="false">always</string>
+    <string translatable="false" name="prefDefault_vibrate_true">always</string>
     <!-- The value to use when migrating from old versions for a false vibrate setting -->
-    <string name="prefDefault_vibrate_false" translatable="false">never</string>
+    <string translatable="false" name="prefDefault_vibrate_false">never</string>
 
     <!-- The vibrateWhen values -->
-    <string-array name="prefValues_vibrateWhen" translatable="false">
+    <string-array translatable="false" name="prefValues_vibrateWhen">
         <item>always</item>
         <item>silent</item>
         <item>never</item>
@@ -622,21 +621,14 @@
     <string name="copy_to_sdcard_success">Attachment saved.</string>
     <!-- Toast message on failed copy to shared storage [CHAR LIMIT=30] -->
     <string name="copy_to_sdcard_fail">Couldn\'t save attachment.</string>
-    <!-- File name used to copy an attachment to the shared storage
-    if the received location is not a valid file name -->
-    <string translatable="false" name="copy_to_sdcard_filename_fallback">mms</string>
     <!-- Menu title to save a sound as a ringtone -->
     <string name="save_ringtone">Save as ringtone</string>
     <!-- Toast message on successful copying ringtone to drm provider -->
     <string name="saved_ringtone">Ringtone saved.</string>
     <!-- Toast message on failed copying ringtone to drm provider -->
     <string name="saved_ringtone_fail">Couldn\'t save ringtone.</string>
-    <!-- File name used to save a sound as a ringtone
-    if the received location is not a valid file name -->
-    <string translatable="false" name="save_ringtone_filename_fallback">mms_ringtone</string>
     <!-- Menu item -->
     <string name="menu_insert_smiley">Insert smiley</string>
-    <string name="menu_insert_emoji">Insert emojis</string>
 
     <!-- This is the dialog title for the "Select link" dialog, shown when the user clicks on a
     chat in the chat history view if there are links in the chat message. The dialog displays the
@@ -765,9 +757,6 @@
          changed -->
     <string name="error_state_text">The state of threads and recipients is inconsistent. Please capture a bug report and report it via http://go/droidanizer </string>
 
-    <string name="label_mms_push">MMS Push</string>
-    <string name="desc_mms_push">Pushes MMS from outbox to the network</string>
-
     <!-- In the title of the compose message activity, when there are multiple recipients, we show
          the number of recipients in the subtitle of the action bar. There's never a case of one. [CHAR LIMIT=50] -->
     <plurals name="recipient_count">
@@ -819,7 +808,7 @@
     <string name="template_new_title">New template</string>
     <string name="template_insert">Insert template</string>
     <string name="template_gesture_draw">Draw the gesture in the space below</string>
-    <string name="template_not_present_error">There are no defined templates</string>
+    <string name="template_not_present_error">You have not defined any template</string>
     <string name="template_not_present_error_title">Error</string>
     <string name="template_select">Select a template</string>
     <string name="template_cancel_confirm_title">Warning</string>
@@ -838,14 +827,6 @@
     <!-- Extra Settings: -->
     <string name="pref_extra_settings">Extra settings</string>
 
-    <!-- Strip unicode -->
-    <string name="pref_title_strip_unicode">Strip unicode</string>
-    <string name="pref_summary_strip_unicode">Substitute common characters that are not supported in 160 character SMS messages</string>
-
-    <!-- Enable emojis -->
-    <string name="pref_title_enable_emojis">Emoji support</string>
-    <string name="pref_summary_enable_emojis">Enable support for unicode emojis, a set of 471 nice emoticons</string>
-
     <!-- Full timestamps -->
     <string name="pref_title_mms_full_timestamp">Full timestamps</string>
     <string name="pref_summary_mms_full_timestamp">Display both date and time in timestamps</string>
@@ -862,22 +843,16 @@
     <string name="pref_wake_unlock_summary">Wake and unlock device on incoming message (insecure lock screens only)</string>
     <string name="pref_close_all_title">Close all</string>
     <string name="pref_close_all_summary">Close button closes all messages</string>
-    <string name="pref_dark_theme_title">Use dark theme</string>
-    <string name="pref_dark_theme_summary">If not selected, the default \'light\' theme will be used</string>
     <string name="message_counter_separator">of</string>
 
     <!-- QM Dialog box buttons -->
     <string name="button_close">Close</string>
     <string name="button_view">View</string>
-    <string name="button_templates">Templates</string>
 
     <!-- Hint text in message body field when keyboard is exposed -->
     <string name="type_to_reply_text_enter_to_send">Type to reply</string>
 
     <!-- QM Toast -->
     <string name="toast_sending_message">Sending message</string>
-
-    <!-- QM - Quick reply -->
-    <string name="qm_quick_reply">Quick reply</string>
 
 </resources>
