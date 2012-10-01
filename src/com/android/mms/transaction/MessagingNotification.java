@@ -1095,7 +1095,7 @@ public class MessagingNotification {
 
         // Don't show the QuickMessage if the user is in a call or the phone is ringing
         // Trigger the QuickMessage pop-up activity if enabled
-        if (qmPopupEnabled) {
+        if (qmPopupEnabled && qmIntent != null) {
             TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
             if (tm.getCallState() == TelephonyManager.CALL_STATE_IDLE) {
                 // Trigger the main activity to fire up a dialog that shows the received messages
