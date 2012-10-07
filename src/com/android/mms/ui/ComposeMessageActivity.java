@@ -4112,8 +4112,8 @@ public class ComposeMessageActivity extends Activity
                 if (!added) {
                     HashMap<String, Object> entry = new HashMap<String, Object>();
 
-                    entry. put("icon", icons[i]);
-                    entry. put("name", names[i]);
+                    entry.put("icon", icons[i]);
+                    entry.put("name", names[i]);
                     entry.put("text", texts[i]);
 
                     entries.add(entry);
@@ -4149,13 +4149,20 @@ public class ComposeMessageActivity extends Activity
                 @SuppressWarnings("unchecked")
                 public final void onClick(DialogInterface dialog, int which) {
                     HashMap<String, Object> item = (HashMap<String, Object>) a.getItem(which);
+                    EditText mToInsert;
 
                     String smiley = (String)item.get("text");
+                    // tag EditText to insert to
                     if (mSubjectTextEditor != null && mSubjectTextEditor.hasFocus()) {
-                        mSubjectTextEditor.append(smiley);
+                        mToInsert = mSubjectTextEditor;
                     } else {
-                        mTextEditor.append(smiley);
+                        mToInsert = mTextEditor;
                     }
+                    // Insert the smiley text at current cursor position in editText
+                    // math funcs deal with text selected in either direction
+                    int start = mToInsert.getSelectionStart();
+                    int end = mToInsert.getSelectionEnd();
+                    mToInsert.getText().replace(Math.min(start, end), Math.max(start, end), smiley);
 
                     dialog.dismiss();
                 }
@@ -4273,8 +4280,12 @@ public class ComposeMessageActivity extends Activity
         if (loader.getId() == LOAD_TEMPLATE_BY_ID) {
             if (data != null && data.getCount() > 0) {
                 data.moveToFirst();
+                // insert template text from gesture at cursor
                 String text = data.getString(data.getColumnIndex(Template.TEXT));
-                mTextEditor.append(text);
+                int start = mTextEditor.getSelectionStart();
+                int end = mTextEditor.getSelectionEnd();
+                mTextEditor.getText().replace(Math.min(start, end),
+                        Math.max(start, end), text);
             }
         }else{
             setProgressBarIndeterminateVisibility(false);
@@ -4314,7 +4325,11 @@ public class ComposeMessageActivity extends Activity
                     public void onClick(DialogInterface dialog, int which) {
                        Cursor c = (Cursor) mTemplatesCursorAdapter.getItem(which);
                        String text = c.getString(c.getColumnIndex(Template.TEXT));
-                       mTextEditor.append(text);
+                       // insert selected template text at the cursor location or replace selected
+                       int start = mTextEditor.getSelectionStart();
+                       int end = mTextEditor.getSelectionEnd();
+                       mTextEditor.getText().replace(Math.min(start, end),
+                               Math.max(start, end), text);
                     }
 
                 });
