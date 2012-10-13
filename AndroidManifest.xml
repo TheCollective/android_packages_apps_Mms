@@ -20,6 +20,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.mms">
 
+    <uses-sdk
+        android:minSdkVersion="14"
+        android:targetSdkVersion="16" />
+
     <original-package android:name="com.android.mms" />
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -40,9 +44,18 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INSTALL_DRM" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
 
     <!-- Needed for QuickMessage -->
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+
+    <!-- Grant permission to system apps to access receiver -->
+    <permission android:name="android.permission.MMS_PUSH"
+                android:protectionLevel="signatureOrSystem"
+                android:label="@string/label_mms_push"
+                android:description="@string/desc_mms_push"/>
+    <uses-permission android:name="android.permission.MMS_PUSH"/>
 
     <application android:name="MmsApp"
             android:label="@string/app_label"
@@ -124,6 +137,11 @@
            </intent-filter>
         </activity>
 
+        <activity android:name=".ui.QuickReply"
+            android:theme="@android:style/Theme.Holo.Dialog"
+            android:taskAffinity="com.android.mms.ui.QuickReply"
+            android:excludeFromRecents="true"/>
+
         <activity-alias android:name=".ui.ForwardMessageActivity"
                   android:targetActivity=".ui.ComposeMessageActivity"
                   android:configChanges="orientation|screenSize|keyboardHidden"
@@ -197,6 +215,13 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
+        </receiver>
+
+        <receiver android:name=".transaction.MmsSystemPushMsgReceiver"
+                  android:permission="android.permission.MMS_PUSH">
+                  <intent-filter>
+                      <action android:name="android.intent.action.MMS_PUSH" />
+                  </intent-filter>
         </receiver>
 
         <activity android:name=".ui.ManageSimMessages"
@@ -345,7 +370,7 @@
              to the foreground.We exclude from recent apps since this is accessible
              through a notification when appropriate.  -->
          <activity
-            android:name=".quickmessage.QuickMessagePopup"
+            android:name=".quickmessage.QuickMessage"
             android:theme="@android:style/Theme.Holo.Dialog"
             android:configChanges="orientation|screenSize"
             android:launchMode="singleTop"

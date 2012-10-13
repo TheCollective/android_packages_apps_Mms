@@ -3,6 +3,7 @@
 /*
  * Copyright (C) 2007-2008 Esmertec AG.
  * Copyright (C) 2007-2008 The Android Open Source Project
+ * QuickMessage: Copyright (C) 2012 The CyanogenMod Project (DvTonder)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,6 +124,12 @@
         android:defaultValue="false" />
 
     <CheckBoxPreference
+        android:key="pref_dark_theme"
+        android:title="@string/pref_dark_theme_title"
+        android:summary="@string/pref_dark_theme_summary"
+        android:defaultValue="false" />
+
+    <CheckBoxPreference
         android:key="pref_key_qm_lockscreen"
         android:title="@string/pref_wake_unlock_title"
         android:summary="@string/pref_wake_unlock_summary"
@@ -164,5 +171,11 @@
         android:title="@string/pref_title_mms_use_sent_timestamp"
         android:summary="@string/pref_summary_mms_use_sent_timestamp"
         android:defaultValue="false" />
+     <ListPreference
+        android:key="pref_key_mms_input_type"
+        android:title="@string/pref_title_input_type"
+        android:summary="@string/pref_summary_input_type"
+        android:entries="@array/pref_entries_input_type"
+        android:entryValues="@array/pref_values_input_type" />
   </PreferenceCategory>
 </PreferenceScreen>
