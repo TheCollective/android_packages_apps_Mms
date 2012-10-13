@@ -19,7 +19,7 @@ package com.android.mms.ui;
 
 import com.android.mms.R;
 import com.android.mms.data.Conversation;
-import com.android.mms.util.EmojiParser;
+//import com.android.mms.util.EmojiParser;
 import com.android.mms.util.SmileyParser;
 
 import java.util.ArrayList;
@@ -212,17 +212,17 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
     private CharSequence replaceWithEmotes(String body) {
         SpannableStringBuilder buf = new SpannableStringBuilder();
 
-        SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(mContext);
-        boolean enableEmojis = prefs.getBoolean(MessagingPreferenceActivity.ENABLE_EMOJIS, false);
+        //SharedPreferences prefs = PreferenceManager
+        //        .getDefaultSharedPreferences(mContext);
+        //boolean enableEmojis = prefs.getBoolean(MessagingPreferenceActivity.ENABLE_EMOJIS, false);
 
         if (!TextUtils.isEmpty(body)) {
             SmileyParser parser = SmileyParser.getInstance();
             CharSequence smileyBody = parser.addSmileySpans(body);
-            if (enableEmojis) {
-                EmojiParser emojiParser = EmojiParser.getInstance();
-                smileyBody = emojiParser.addEmojiSpans(smileyBody);
-            }
+            //if (enableEmojis) {
+            //    EmojiParser emojiParser = EmojiParser.getInstance();
+            //    smileyBody = emojiParser.addEmojiSpans(smileyBody);
+            //}
             buf.append(smileyBody);
         }
         return buf;
@@ -238,17 +238,17 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
     private CharSequence replaceWithEmotes(CharSequence body) {
         SpannableStringBuilder buf = new SpannableStringBuilder();
 
-        SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(mContext);
-        boolean enableEmojis = prefs.getBoolean(MessagingPreferenceActivity.ENABLE_EMOJIS, false);
+        //SharedPreferences prefs = PreferenceManager
+        //        .getDefaultSharedPreferences(mContext);
+        //boolean enableEmojis = prefs.getBoolean(MessagingPreferenceActivity.ENABLE_EMOJIS, false);
 
         if (!TextUtils.isEmpty(body)) {
             SmileyParser parser = SmileyParser.getInstance();
             CharSequence smileyBody = parser.addSmileySpans(body);
-            if (enableEmojis) {
-                EmojiParser emojiParser = EmojiParser.getInstance();
-                smileyBody = emojiParser.addEmojiSpans(smileyBody);
-            }
+            //if (enableEmojis) {
+            //   EmojiParser emojiParser = EmojiParser.getInstance();
+            //    smileyBody = emojiParser.addEmojiSpans(smileyBody);
+            //}
             buf.append(smileyBody);
         }
         return buf;
@@ -432,9 +432,9 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
             case R.id.qr_menu_smiley:
                 showSmileyDialog();
                 return true;
-            case R.id.qr_menu_emoji:
-                showEmojiDialog();
-                return true;
+            //case R.id.qr_menu_emoji:
+            //    showEmojiDialog();
+            //    return true;
             default:
                 return false;
         }
@@ -524,63 +524,64 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
         mSmileyDialog.show();
     }
 
-    private void showEmojiDialog() {
-        if (mEmojiDialog == null) {
-            int[] icons = EmojiParser.DEFAULT_EMOJI_RES_IDS;
-
-            int layout = R.layout.emoji_insert_view;
-            mEmojiView = getLayoutInflater().inflate(layout, null);
-
-            final GridView gridView = (GridView) mEmojiView.findViewById(R.id.emoji_grid_view);
-            gridView.setAdapter(new ImageAdapter(this, icons));
-            final EditText editText = (EditText) mEmojiView.findViewById(R.id.emoji_edit_text);
-            final Button button = (Button) mEmojiView.findViewById(R.id.emoji_button);
-
-            gridView.setOnItemClickListener(new OnItemClickListener() {
-                public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                    // We use the new unified Unicode 6.1 emoji code points
-                    CharSequence emoji = EmojiParser.getInstance().addEmojiSpans(
-                            EmojiParser.mEmojiTexts[position]);
-                    editText.append(emoji);
-                }
-            });
-
-            gridView.setOnItemLongClickListener(new OnItemLongClickListener() {
-                @Override
-                public boolean onItemLongClick(AdapterView<?> parent, View view, int position,
-                        long id) {
-                    // We use the new unified Unicode 6.1 emoji code points
-                    CharSequence emoji = EmojiParser.getInstance().addEmojiSpans(
-                            EmojiParser.mEmojiTexts[position]);
-                    textBox.append(emoji);
-
-                    mEmojiDialog.dismiss();
-                    return true;
-                }
-            });
-
-            button.setOnClickListener(new android.view.View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    textBox.append(editText.getText());
-                    mEmojiDialog.dismiss();
-                }
-            });
-
-            AlertDialog.Builder b = new AlertDialog.Builder(this);
-
-            b.setTitle(getString(R.string.menu_insert_emoji));
-
-            b.setCancelable(true);
-            b.setView(mEmojiView);
-
-            mEmojiDialog = b.create();
-        }
-
-        final EditText editText = (EditText) mEmojiView.findViewById(R.id.emoji_edit_text);
-        editText.setText("");
-
-        mEmojiDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-        mEmojiDialog.show();
-    }
+	/*    private void showEmojiDialog() {
+	*        if (mEmojiDialog == null) {
+	*            int[] icons = EmojiParser.DEFAULT_EMOJI_RES_IDS;
+	*
+	*            int layout = R.layout.emoji_insert_view;
+	*            mEmojiView = getLayoutInflater().inflate(layout, null);
+	*
+	*            final GridView gridView = (GridView) mEmojiView.findViewById(R.id.emoji_grid_view);
+	*            gridView.setAdapter(new ImageAdapter(this, icons));
+	*            final EditText editText = (EditText) mEmojiView.findViewById(R.id.emoji_edit_text);
+	*            final Button button = (Button) mEmojiView.findViewById(R.id.emoji_button);
+	*
+	*            gridView.setOnItemClickListener(new OnItemClickListener() {
+	*                public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+	*                    // We use the new unified Unicode 6.1 emoji code points
+	*                    CharSequence emoji = EmojiParser.getInstance().addEmojiSpans(
+	*                            EmojiParser.mEmojiTexts[position]);
+	*                    editText.append(emoji);
+	*                }
+	*            });
+	*
+	*            gridView.setOnItemLongClickListener(new OnItemLongClickListener() {
+	*                @Override
+	*                public boolean onItemLongClick(AdapterView<?> parent, View view, int position,
+	*                        long id) {
+	*                    // We use the new unified Unicode 6.1 emoji code points
+	*                    CharSequence emoji = EmojiParser.getInstance().addEmojiSpans(
+	*                            EmojiParser.mEmojiTexts[position]);
+	*                    textBox.append(emoji);
+	*
+	*                    mEmojiDialog.dismiss();
+	*                    return true;
+	*                }
+	*            });
+	*
+	*            button.setOnClickListener(new android.view.View.OnClickListener() {
+	*                @Override
+	*                public void onClick(View v) {
+	*                    textBox.append(editText.getText());
+	*                    mEmojiDialog.dismiss();
+	*                }
+	*            });
+	*
+	*            AlertDialog.Builder b = new AlertDialog.Builder(this);
+	*
+	*            b.setTitle(getString(R.string.menu_insert_emoji));
+	*
+	*            b.setCancelable(true);
+	*            b.setView(mEmojiView);
+	*
+	*            mEmojiDialog = b.create();
+	*        }
+	*
+	*        final EditText editText = (EditText) mEmojiView.findViewById(R.id.emoji_edit_text);
+	*        editText.setText("");
+	*
+	*        mEmojiDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+	*        mEmojiDialog.show();
+	*    }
+	*/
 }

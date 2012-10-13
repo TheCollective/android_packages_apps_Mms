@@ -10,8 +10,8 @@
     <item
         android:id="@+id/qr_menu_smiley"
         android:title="@string/qr_pick_smiley"/>
-    <item
+    <!--<item
         android:id="@+id/qr_menu_emoji"
-        android:title="@string/qr_pick_emoji"/>
+        android:title="@string/qr_pick_emoji"/>-->
 
 </menu>
