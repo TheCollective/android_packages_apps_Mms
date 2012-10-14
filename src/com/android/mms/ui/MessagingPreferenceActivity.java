@@ -77,6 +77,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     public static final String FULL_TIMESTAMP            = "pref_key_mms_full_timestamp";
     public static final String SENT_TIMESTAMP            = "pref_key_mms_use_sent_timestamp";
     public static final String INPUT_TYPE                = "pref_key_mms_input_type";
+    public static final String DISPLAY_FULLDATE          = "pref_key_display_fulldate";
 
     // QuickMessage
     public static final String QUICKMESSAGE_ENABLED      = "pref_key_quickmessage";
@@ -525,4 +526,11 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         }
         mVibrateWhenPref.setSummary(null);
     }
+
+    public static boolean getFullDateEnabled(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean fullDateEnabled =
+            prefs.getBoolean(MessagingPreferenceActivity.DISPLAY_FULLDATE, false);
+        return fullDateEnabled;
+   }
 }

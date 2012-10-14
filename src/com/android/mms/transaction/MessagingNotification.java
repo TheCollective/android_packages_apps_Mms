@@ -1214,7 +1214,7 @@ public class MessagingNotification {
 
         // Post the notification
         nm.notify(NOTIFICATION_ID, notification);
-
+        }
     }
 
     protected static CharSequence buildTickerMessage(
@@ -1223,8 +1223,8 @@ public class MessagingNotification {
 
         StringBuilder buf = new StringBuilder(
                 displayAddress == null
-                        ? ""
-                        : displayAddress.replace('\n', ' ').replace('\r', ' '));
+                ? ""
+                : displayAddress.replace('\n', ' ').replace('\r', ' '));
         buf.append(':').append(' ');
 
         int offset = buf.length();
@@ -1264,7 +1264,7 @@ public class MessagingNotification {
     }
 
     private static void notifyFailed(Context context, boolean isDownload, long threadId,
-            boolean noisy) {
+                                     boolean noisy) {
         // TODO factor out common code for creating notifications
         boolean enabled = MessagingPreferenceActivity.getNotificationEnabled(context);
         if (!enabled) {
