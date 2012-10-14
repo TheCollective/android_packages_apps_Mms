@@ -34,7 +34,7 @@ public class QuickMessage {
         mFromNumber[0] = fromNumber;
         mContent = nInfo;
         mReplyText = "";
-        makeTimestamp = nInfo.mTimeMillis;
+        mTimestamp = nInfo.mTimeMillis;
     }
 
     public void setEditText(EditText object) {
