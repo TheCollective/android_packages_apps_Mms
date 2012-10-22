@@ -462,8 +462,7 @@ public class MessagingNotification {
                     if (spannableStringBuilder.length() > 0) {
                         spannableStringBuilder.append(separator);
                     }
-                    spannableStringBuilder
-                            .append(getAttachmentTypeString(context, mAttachmentType));
+                  spannableStringBuilder.append(getAttachmentTypeString(context, mAttachmentType));
                 }
             }
             if (message.length() > 0) {
@@ -1199,7 +1198,10 @@ public class MessagingNotification {
             }
         }
 
-        // Display QuickMessage if enabled in preferences and this is an Sms message
+        // Post the notification
+	   nm.notify(NOTIFICATION_ID, notification);
+	  
+	    // Display QuickMessage if enabled in preferences and this is an Sms message
         if (MessagingPreferenceActivity.getQuickMessageEnabled(context)
                 && mostRecentNotification.mIsSms) {
 
@@ -1282,9 +1284,7 @@ public class MessagingNotification {
         // notification.If you select the 2nd undelivered one it will dismiss
         // the notification.
 
-        long[] msgThreadId = {
-                0, 1
-        }; // Dummy initial values, just to initialize the memory
+        long[] msgThreadId = {0, 1};    // Dummy initial values, just to initialize the memory
         int totalFailedCount = getUndeliveredMessageCount(context, msgThreadId);
         if (totalFailedCount == 0 && !isDownload) {
             return;
@@ -1426,9 +1426,7 @@ public class MessagingNotification {
      * notification.
      */
     public static void updateSendFailedNotificationForThread(Context context, long threadId) {
-        long[] msgThreadId = {
-                0, 0
-        };
+        long[] msgThreadId = {0, 0};
         if (getUndeliveredMessageCount(context, msgThreadId) > 0
                 && msgThreadId[0] == threadId
                 && msgThreadId[1] != 0) {
