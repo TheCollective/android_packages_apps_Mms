@@ -1,7 +1,6 @@
 /*
- * Copyright (C) 2008 Esmertec AG. 
+ * Copyright (C) 2008 Esmertec AG.
  * Copyright (C) 2008 The Android Open Source Project
- * QuickMessage (C) 2012 The CyanogenMod Project (DvTonder)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,48 +20,33 @@ package com.android.mms.transaction;
 import static com.google.android.mms.pdu.PduHeaders.MESSAGE_TYPE_NOTIFICATION_IND;
 import static com.google.android.mms.pdu.PduHeaders.MESSAGE_TYPE_RETRIEVE_CONF;
 
-import com.android.mms.R;
-import com.android.mms.LogTag;
-import com.android.mms.data.Contact;
-import com.android.mms.data.Conversation;
-import com.android.mms.data.WorkingMessage;
-import com.android.mms.model.SlideModel;
-import com.android.mms.model.SlideshowModel;
-import com.android.mms.quickmessage.QuickMessagePopup;
-import com.android.mms.ui.ComposeMessageActivity;
-import com.android.mms.ui.ConversationList;
-import com.android.mms.ui.MessagingPreferenceActivity;
-import com.android.mms.util.AddressUtils;
-import com.android.mms.util.DownloadManager;
-import com.android.mms.widget.MmsWidgetProvider;
-
-import com.google.android.mms.MmsException;
-import com.google.android.mms.pdu.EncodedStringValue;
-import com.google.android.mms.pdu.GenericPdu;
-import com.google.android.mms.pdu.MultimediaMessagePdu;
-import com.google.android.mms.pdu.PduHeaders;
-import com.google.android.mms.pdu.PduPersister;
-import android.database.sqlite.SqliteWrapper;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.sqlite.SqliteWrapper;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -79,81 +63,88 @@ import android.text.style.TextAppearanceSpan;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import com.android.mms.LogTag;
+import com.android.mms.R;
+import com.android.mms.data.Contact;
+import com.android.mms.data.Conversation;
+import com.android.mms.data.WorkingMessage;
+import com.android.mms.model.SlideModel;
+import com.android.mms.model.SlideshowModel;
+import com.android.mms.quickmessage.QmMarkRead;
+import com.android.mms.quickmessage.QuickMessagePopup;
+import com.android.mms.ui.ComposeMessageActivity;
+import com.android.mms.ui.ConversationList;
+import com.android.mms.ui.MessageUtils;
+import com.android.mms.ui.MessagingPreferenceActivity;
+import com.android.mms.util.AddressUtils;
+import com.android.mms.util.DownloadManager;
+import com.android.mms.widget.MmsWidgetProvider;
+import com.google.android.mms.MmsException;
+import com.google.android.mms.pdu.EncodedStringValue;
+import com.google.android.mms.pdu.GenericPdu;
+import com.google.android.mms.pdu.MultimediaMessagePdu;
+import com.google.android.mms.pdu.PduHeaders;
+import com.google.android.mms.pdu.PduPersister;
 
 /**
- * This class is used to update the notification indicator. It will check
- * whether there are unread messages. If yes, it would show the notification
- * indicator, otherwise, hide the indicator.
+ * This class is used to update the notification indicator. It will check whether
+ * there are unread messages. If yes, it would show the notification indicator,
+ * otherwise, hide the indicator.
  */
 public class MessagingNotification {
 
     private static final String TAG = LogTag.APP;
-    private static final boolean DEBUG = false; // TODO turn off before ship
+    private static final boolean DEBUG = false;
 
     public static final int NOTIFICATION_ID = 123;
     public static final int MESSAGE_FAILED_NOTIFICATION_ID = 789;
     public static final int DOWNLOAD_FAILED_NOTIFICATION_ID = 531;
     /**
-     * This is the volume at which to play the in-conversation notification
-     * sound, expressed as a fraction of the system notification volume.
+     * This is the volume at which to play the in-conversation notification sound,
+     * expressed as a fraction of the system notification volume.
      */
     private static final float IN_CONVERSATION_NOTIFICATION_VOLUME = 0.25f;
 
     // This must be consistent with the column constants below.
     private static final String[] MMS_STATUS_PROJECTION = new String[] {
-            Mms.THREAD_ID, Mms.DATE, Mms._ID, Mms.SUBJECT, Mms.SUBJECT_CHARSET
-    };
+        Mms.THREAD_ID, Mms.DATE, Mms._ID, Mms.SUBJECT, Mms.SUBJECT_CHARSET };
 
     // This must be consistent with the column constants below.
     private static final String[] SMS_STATUS_PROJECTION = new String[] {
-            Sms.THREAD_ID, Sms.DATE, Sms.ADDRESS, Sms.SUBJECT, Sms.BODY
-    };
+        Sms.THREAD_ID, Sms.DATE, Sms.ADDRESS, Sms.SUBJECT, Sms.BODY };
 
     // These must be consistent with MMS_STATUS_PROJECTION and
     // SMS_STATUS_PROJECTION.
-    private static final int COLUMN_THREAD_ID = 0;
-    private static final int COLUMN_DATE = 1;
-    private static final int COLUMN_MMS_ID = 2;
+    private static final int COLUMN_THREAD_ID   = 0;
+    private static final int COLUMN_DATE        = 1;
+    private static final int COLUMN_MMS_ID      = 2;
     private static final int COLUMN_SMS_ADDRESS = 2;
-    private static final int COLUMN_SUBJECT = 3;
-    private static final int COLUMN_SUBJECT_CS = 4;
-    private static final int COLUMN_SMS_BODY = 4;
+    private static final int COLUMN_SUBJECT     = 3;
+    private static final int COLUMN_SUBJECT_CS  = 4;
+    private static final int COLUMN_SMS_BODY    = 4;
 
-    private static final Uri SMS_INBOX_URI = Uri.withAppendedPath(
-            Uri.parse("content://sms"), "inbox");
-
-    private static final String[] SMS_THREAD_ID_PROJECTION = new String[] {
-            Sms.THREAD_ID
-    };
-    private static final String[] MMS_THREAD_ID_PROJECTION = new String[] {
-            Mms.THREAD_ID
-    };
+    private static final String[] SMS_THREAD_ID_PROJECTION = new String[] { Sms.THREAD_ID };
+    private static final String[] MMS_THREAD_ID_PROJECTION = new String[] { Mms.THREAD_ID };
 
     private static final String NEW_INCOMING_SM_CONSTRAINT =
             "(" + Sms.TYPE + " = " + Sms.MESSAGE_TYPE_INBOX
-                    + " AND " + Sms.SEEN + " = 0)";
+            + " AND " + Sms.SEEN + " = 0)";
 
     private static final String NEW_DELIVERY_SM_CONSTRAINT =
-            "(" + Sms.TYPE + " = " + Sms.MESSAGE_TYPE_SENT
-                    + " AND " + Sms.STATUS + " = " + Sms.STATUS_COMPLETE + ")";
+        "(" + Sms.TYPE + " = " + Sms.MESSAGE_TYPE_SENT
+        + " AND " + Sms.STATUS + " = "+ Sms.STATUS_COMPLETE +")";
 
     private static final String NEW_INCOMING_MM_CONSTRAINT =
             "(" + Mms.MESSAGE_BOX + "=" + Mms.MESSAGE_BOX_INBOX
-                    + " AND " + Mms.SEEN + "=0"
-                    + " AND (" + Mms.MESSAGE_TYPE + "=" + MESSAGE_TYPE_NOTIFICATION_IND
-                    + " OR " + Mms.MESSAGE_TYPE + "=" + MESSAGE_TYPE_RETRIEVE_CONF + "))";
+            + " AND " + Mms.SEEN + "=0"
+            + " AND (" + Mms.MESSAGE_TYPE + "=" + MESSAGE_TYPE_NOTIFICATION_IND
+            + " OR " + Mms.MESSAGE_TYPE + "=" + MESSAGE_TYPE_RETRIEVE_CONF + "))";
 
     private static final NotificationInfoComparator INFO_COMPARATOR =
             new NotificationInfoComparator();
 
     private static final Uri UNDELIVERED_URI = Uri.parse("content://mms-sms/undelivered");
+
 
     private final static String NOTIFICATION_DELETED_ACTION =
             "com.android.mms.NOTIFICATION_DELETED_ACTION";
@@ -172,8 +163,7 @@ public class MessagingNotification {
     public static final long THREAD_ALL = -1;
     public static final long THREAD_NONE = -2;
     /**
-     * Keeps track of the thread ID of the conversation that's currently
-     * displayed to the user
+     * Keeps track of the thread ID of the conversation that's currently displayed to the user
      */
     private static long sCurrentlyDisplayedThreadId;
     private static final Object sCurrentlyDisplayedThreadLock = new Object();
@@ -185,17 +175,9 @@ public class MessagingNotification {
     private static final int MAX_BITMAP_DIMEN_DP = 360;
     private static float sScreenDensity;
 
-    /**
-     * mNotificationSet is kept sorted by the incoming message delivery time,
-     * with the most recent message first.
-     */
-    private static SortedSet<NotificationInfo> sNotificationSet =
-            new TreeSet<NotificationInfo>(INFO_COMPARATOR);
+    private static final int MAX_MESSAGES_TO_SHOW = 8;  // the maximum number of new messages to
+                                                        // show in a single notification.
 
-    private static final int MAX_MESSAGES_TO_SHOW = 8; // the maximum number of
-                                                       // new messages to
-                                                       // show in a single
-                                                       // notification.
 
     private MessagingNotification() {
     }
@@ -216,33 +198,38 @@ public class MessagingNotification {
     }
 
     /**
-     * Specifies which message thread is currently being viewed by the user. New
-     * messages in that thread will not generate a notification icon and will
-     * play the notification sound at a lower volume. Make sure you set this to
-     * THREAD_NONE when the UI component that shows the thread is no longer
-     * visible to the user (e.g. Activity.onPause(), etc.)
-     * 
-     * @param threadId The ID of the thread that the user is currently viewing.
-     *            Pass THREAD_NONE if the user is not viewing a thread, or
-     *            THREAD_ALL if the user is viewing the conversation list (note:
-     *            that latter one has no effect as of this implementation)
+     * Specifies which message thread is currently being viewed by the user. New messages in that
+     * thread will not generate a notification icon and will play the notification sound at a lower
+     * volume. Make sure you set this to THREAD_NONE when the UI component that shows the thread is
+     * no longer visible to the user (e.g. Activity.onPause(), etc.)
+     * @param threadId The ID of the thread that the user is currently viewing. Pass THREAD_NONE
+     *  if the user is not viewing a thread, or THREAD_ALL if the user is viewing the conversation
+     *  list (note: that latter one has no effect as of this implementation)
      */
     public static void setCurrentlyDisplayedThreadId(long threadId) {
         synchronized (sCurrentlyDisplayedThreadLock) {
             sCurrentlyDisplayedThreadId = threadId;
+            if (DEBUG) {
+                Log.d(TAG, "setCurrentlyDisplayedThreadId: " + sCurrentlyDisplayedThreadId);
+            }
         }
     }
 
     /**
-     * Checks to see if there are any "unseen" messages or delivery reports.
-     * Shows the most recent notification if there is one. Does its work and
-     * query in a worker thread.
-     * 
+     * Checks to see if there are any "unseen" messages or delivery
+     * reports.  Shows the most recent notification if there is one.
+     * Does its work and query in a worker thread.
+     *
      * @param context the context to use
      */
     public static void nonBlockingUpdateNewMessageIndicator(final Context context,
             final long newMsgThreadId,
             final boolean isStatusMessage) {
+        if (DEBUG) {
+            Log.d(TAG, "nonBlockingUpdateNewMessageIndicator: newMsgThreadId: " +
+                    newMsgThreadId +
+                    " sCurrentlyDisplayedThreadId: " + sCurrentlyDisplayedThreadId);
+        }
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -252,59 +239,69 @@ public class MessagingNotification {
     }
 
     /**
-     * Checks to see if there are any "unseen" messages or delivery reports and
-     * builds a sorted (by delivery date) list of unread notifications.
-     * 
+     * Checks to see if there are any "unseen" messages or delivery
+     * reports and builds a sorted (by delivery date) list of unread notifications.
+     *
      * @param context the context to use
-     * @param newMsgThreadId The thread ID of a new message that we're to notify
-     *            about; if there's no new message, use THREAD_NONE. If we
-     *            should notify about multiple or unknown thread IDs, use
-     *            THREAD_ALL.
+     * @param newMsgThreadId The thread ID of a new message that we're to notify about; if there's
+     *  no new message, use THREAD_NONE. If we should notify about multiple or unknown thread IDs,
+     *  use THREAD_ALL.
      * @param isStatusMessage
      */
     public static void blockingUpdateNewMessageIndicator(Context context, long newMsgThreadId,
             boolean isStatusMessage) {
-        synchronized (sCurrentlyDisplayedThreadLock) {
-            if (newMsgThreadId > 0 && newMsgThreadId == sCurrentlyDisplayedThreadId) {
-                if (DEBUG) {
-                    Log.d(TAG, "blockingUpdateNewMessageIndicator: newMsgThreadId == " +
-                            "sCurrentlyDisplayedThreadId so NOT showing notification," +
-                            " but playing soft sound. threadId: " + newMsgThreadId);
-                }
-                playInConversationNotificationSound(context);
-                return;
-            }
+        if (DEBUG) {
+            Contact.logWithTrace(TAG, "blockingUpdateNewMessageIndicator: newMsgThreadId: " +
+                    newMsgThreadId);
         }
-        sNotificationSet.clear();
+        // notificationSet is kept sorted by the incoming message delivery time, with the
+        // most recent message first.
+        SortedSet<NotificationInfo> notificationSet =
+                new TreeSet<NotificationInfo>(INFO_COMPARATOR);
 
-        MmsSmsDeliveryInfo delivery = null;
         Set<Long> threads = new HashSet<Long>(4);
 
-        int count = 0;
-        addMmsNotificationInfos(context, threads);
-        addSmsNotificationInfos(context, threads);
+        addMmsNotificationInfos(context, threads, notificationSet);
+        addSmsNotificationInfos(context, threads, notificationSet);
 
-        cancelNotification(context, NOTIFICATION_ID);
-        if (!sNotificationSet.isEmpty()) {
-            if (Log.isLoggable(LogTag.APP, Log.VERBOSE)) {
-                Log.d(TAG, "blockingUpdateNewMessageIndicator: count=" + count +
+        if (notificationSet.isEmpty()) {
+            if (DEBUG) {
+                Log.d(TAG, "blockingUpdateNewMessageIndicator: notificationSet is empty, " +
+                        "canceling existing notifications");
+            }
+            cancelNotification(context, NOTIFICATION_ID);
+        } else {
+            if (DEBUG || Log.isLoggable(LogTag.APP, Log.VERBOSE)) {
+                Log.d(TAG, "blockingUpdateNewMessageIndicator: count=" + notificationSet.size() +
                         ", newMsgThreadId=" + newMsgThreadId);
             }
-            updateNotification(context, newMsgThreadId != THREAD_NONE, threads.size());
+            synchronized (sCurrentlyDisplayedThreadLock) {
+                if (newMsgThreadId > 0 && newMsgThreadId == sCurrentlyDisplayedThreadId &&
+                        threads.contains(newMsgThreadId)) {
+                    if (DEBUG) {
+                        Log.d(TAG, "blockingUpdateNewMessageIndicator: newMsgThreadId == " +
+                                "sCurrentlyDisplayedThreadId so NOT showing notification," +
+                                " but playing soft sound. threadId: " + newMsgThreadId);
+                    }
+                    playInConversationNotificationSound(context);
+                    return;
+                }
+            }
+            updateNotification(context, newMsgThreadId != THREAD_NONE, threads.size(),
+                    notificationSet);
         }
 
-        // And deals with delivery reports (which use Toasts). It's safe to call
-        // in a worker
+        // And deals with delivery reports (which use Toasts). It's safe to call in a worker
         // thread because the toast will eventually get posted to a handler.
-        delivery = getSmsNewDeliveryInfo(context);
+        MmsSmsDeliveryInfo delivery = getSmsNewDeliveryInfo(context);
         if (delivery != null) {
             delivery.deliver(context, isStatusMessage);
         }
     }
 
     /**
-     * Play the in-conversation notification sound (it's the regular
-     * notification sound, but played at half-volume
+     * Play the in-conversation notification sound (it's the regular notification sound, but
+     * played at half-volume
      */
     private static void playInConversationNotificationSound(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
@@ -324,8 +321,12 @@ public class MessagingNotification {
      * Updates all pending notifications, clearing or updating them as
      * necessary.
      */
-    public static void blockingUpdateAllNotifications(final Context context) {
-        nonBlockingUpdateNewMessageIndicator(context, THREAD_NONE, false);
+    public static void blockingUpdateAllNotifications(final Context context, long threadId) {
+        if (DEBUG) {
+            Contact.logWithTrace(TAG, "blockingUpdateAllNotifications: newMsgThreadId: " +
+                    threadId);
+        }
+        nonBlockingUpdateNewMessageIndicator(context, threadId, false);
         nonBlockingUpdateSendFailedNotification(context);
         updateDownloadFailedNotification(context);
         MmsWidgetProvider.notifyDatasetChanged(context);
@@ -364,12 +365,11 @@ public class MessagingNotification {
          * @param clickIntent where to go when the user taps the notification
          * @param message for a single message, this is the message text
          * @param subject text of mms subject
-         * @param ticker text displayed ticker-style across the notification,
-         *            typically formatted as sender: message
+         * @param ticker text displayed ticker-style across the notification, typically formatted
+         * as sender: message
          * @param timeMillis date the message was received
          * @param title for a single message, this is the sender
-         * @param attachmentBitmap a bitmap of an attachment, such as a picture
-         *            or video
+         * @param attachmentBitmap a bitmap of an attachment, such as a picture or video
          * @param sender contact of the sender
          * @param attachmentType of the mms attachment
          * @param threadId thread this message belongs to
@@ -396,14 +396,12 @@ public class MessagingNotification {
             return mTimeMillis;
         }
 
-        // This is the message string used in bigText and bigPicture
-        // notifications.
+        // This is the message string used in bigText and bigPicture notifications.
         public CharSequence formatBigMessage(Context context) {
             final TextAppearanceSpan notificationSubjectSpan = new TextAppearanceSpan(
                     context, R.style.NotificationPrimaryText);
 
-            // Change multiple newlines (with potential white space between),
-            // into a single new line
+            // Change multiple newlines (with potential white space between), into a single new line
             final String message =
                     !TextUtils.isEmpty(mMessage) ? mMessage.replaceAll("\\n\\s+", "\n") : "";
 
@@ -427,54 +425,52 @@ public class MessagingNotification {
             return spannableStringBuilder;
         }
 
-        // This is the message string used in each line of an inboxStyle
-        // notification.
+        // This is the message string used in each line of an inboxStyle notification.
         public CharSequence formatInboxMessage(Context context) {
-            final TextAppearanceSpan notificationSenderSpan = new TextAppearanceSpan(
-                    context, R.style.NotificationPrimaryText);
+          final TextAppearanceSpan notificationSenderSpan = new TextAppearanceSpan(
+                  context, R.style.NotificationPrimaryText);
 
-            final TextAppearanceSpan notificationSubjectSpan = new TextAppearanceSpan(
-                    context, R.style.NotificationSubjectText);
+          final TextAppearanceSpan notificationSubjectSpan = new TextAppearanceSpan(
+                  context, R.style.NotificationSubjectText);
 
-            // Change multiple newlines (with potential white space between),
-            // into a single new line
-            final String message =
-                    !TextUtils.isEmpty(mMessage) ? mMessage.replaceAll("\\n\\s+", "\n") : "";
+          // Change multiple newlines (with potential white space between), into a single new line
+          final String message =
+                  !TextUtils.isEmpty(mMessage) ? mMessage.replaceAll("\\n\\s+", "\n") : "";
 
-            SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
-            final String sender = mSender.getName();
-            if (!TextUtils.isEmpty(sender)) {
-                spannableStringBuilder.append(sender);
-                spannableStringBuilder.setSpan(notificationSenderSpan, 0, sender.length(), 0);
-            }
-            String separator = context.getString(R.string.notification_separator);
-            if (!mIsSms) {
-                if (!TextUtils.isEmpty(mSubject)) {
-                    if (spannableStringBuilder.length() > 0) {
-                        spannableStringBuilder.append(separator);
-                    }
-                    int start = spannableStringBuilder.length();
-                    spannableStringBuilder.append(mSubject);
-                    spannableStringBuilder.setSpan(notificationSubjectSpan, start,
-                            start + mSubject.length(), 0);
-                }
-                if (mAttachmentType > WorkingMessage.TEXT) {
-                    if (spannableStringBuilder.length() > 0) {
-                        spannableStringBuilder.append(separator);
-                    }
+          SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
+          final String sender = mSender.getName();
+          if (!TextUtils.isEmpty(sender)) {
+              spannableStringBuilder.append(sender);
+              spannableStringBuilder.setSpan(notificationSenderSpan, 0, sender.length(), 0);
+          }
+          String separator = context.getString(R.string.notification_separator);
+          if (!mIsSms) {
+              if (!TextUtils.isEmpty(mSubject)) {
+                  if (spannableStringBuilder.length() > 0) {
+                      spannableStringBuilder.append(separator);
+                  }
+                  int start = spannableStringBuilder.length();
+                  spannableStringBuilder.append(mSubject);
+                  spannableStringBuilder.setSpan(notificationSubjectSpan, start,
+                          start + mSubject.length(), 0);
+              }
+              if (mAttachmentType > WorkingMessage.TEXT) {
+                  if (spannableStringBuilder.length() > 0) {
+                      spannableStringBuilder.append(separator);
+                  }
                   spannableStringBuilder.append(getAttachmentTypeString(context, mAttachmentType));
-                }
-            }
-            if (message.length() > 0) {
-                if (spannableStringBuilder.length() > 0) {
-                    spannableStringBuilder.append(separator);
-                }
-                int start = spannableStringBuilder.length();
-                spannableStringBuilder.append(message);
-                spannableStringBuilder.setSpan(notificationSubjectSpan, start,
-                        start + message.length(), 0);
-            }
-            return spannableStringBuilder;
+              }
+          }
+          if (message.length() > 0) {
+              if (spannableStringBuilder.length() > 0) {
+                  spannableStringBuilder.append(separator);
+              }
+              int start = spannableStringBuilder.length();
+              spannableStringBuilder.append(message);
+              spannableStringBuilder.setSpan(notificationSubjectSpan, start,
+                      start + message.length(), 0);
+          }
+          return spannableStringBuilder;
         }
 
         // This is the summary string used in bigPicture notifications.
@@ -482,8 +478,7 @@ public class MessagingNotification {
             final TextAppearanceSpan notificationSubjectSpan = new TextAppearanceSpan(
                     context, R.style.NotificationPrimaryText);
 
-            // Change multiple newlines (with potential white space between),
-            // into a single new line
+            // Change multiple newlines (with potential white space between), into a single new line
             final String message =
                     !TextUtils.isEmpty(mMessage) ? mMessage.replaceAll("\\n\\s+", "\n") : "";
 
@@ -551,7 +546,7 @@ public class MessagingNotification {
         final TextAppearanceSpan notificationSenderSpan = new TextAppearanceSpan(
                 context, R.style.NotificationPrimaryText);
 
-        String separator = context.getString(R.string.enumeration_comma); // ", "
+        String separator = context.getString(R.string.enumeration_comma);   // ", "
         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
         int len = senders.size();
         for (int i = 0; i < len; i++) {
@@ -565,26 +560,17 @@ public class MessagingNotification {
         return spannableStringBuilder;
     }
 
-    // Return a formatted string with the attachmentType spelled out as a
-    // string. For
+    // Return a formatted string with the attachmentType spelled out as a string. For
     // no attachment (or just text), return null.
     private static CharSequence getAttachmentTypeString(Context context, int attachmentType) {
         final TextAppearanceSpan notificationAttachmentSpan = new TextAppearanceSpan(
                 context, R.style.NotificationSecondaryText);
         int id = 0;
         switch (attachmentType) {
-            case WorkingMessage.AUDIO:
-                id = R.string.attachment_audio;
-                break;
-            case WorkingMessage.VIDEO:
-                id = R.string.attachment_video;
-                break;
-            case WorkingMessage.SLIDESHOW:
-                id = R.string.attachment_slideshow;
-                break;
-            case WorkingMessage.IMAGE:
-                id = R.string.attachment_picture;
-                break;
+            case WorkingMessage.AUDIO: id = R.string.attachment_audio; break;
+            case WorkingMessage.VIDEO: id = R.string.attachment_video; break;
+            case WorkingMessage.SLIDESHOW: id = R.string.attachment_slideshow; break;
+            case WorkingMessage.IMAGE: id = R.string.attachment_picture; break;
         }
         if (id > 0) {
             final SpannableString spannableString = new SpannableString(context.getString(id));
@@ -593,11 +579,12 @@ public class MessagingNotification {
             return spannableString;
         }
         return null;
-    }
+     }
 
     /**
-     * Sorts by the time a notification was received in descending order --
-     * newer first.
+     *
+     * Sorts by the time a notification was received in descending order -- newer first.
+     *
      */
     private static final class NotificationInfoComparator
             implements Comparator<NotificationInfo> {
@@ -609,19 +596,17 @@ public class MessagingNotification {
     }
 
     private static final void addMmsNotificationInfos(
-            Context context, Set<Long> threads) {
+            Context context, Set<Long> threads, SortedSet<NotificationInfo> notificationSet) {
         ContentResolver resolver = context.getContentResolver();
 
         // This query looks like this when logged:
-        // I/Database( 147):
-        // elapsedTime4Sql|/data/data/com.android.providers.telephony/databases/
-        // mmssms.db|0.362 ms|SELECT thread_id, date, _id, sub, sub_cs FROM pdu
-        // WHERE ((msg_box=1
+        // I/Database(  147): elapsedTime4Sql|/data/data/com.android.providers.telephony/databases/
+        // mmssms.db|0.362 ms|SELECT thread_id, date, _id, sub, sub_cs FROM pdu WHERE ((msg_box=1
         // AND seen=0 AND (m_type=130 OR m_type=132))) ORDER BY date desc
 
         Cursor cursor = SqliteWrapper.query(context, resolver, Mms.CONTENT_URI,
-                MMS_STATUS_PROJECTION, NEW_INCOMING_MM_CONSTRAINT,
-                null, Mms.DATE + " desc");
+                            MMS_STATUS_PROJECTION, NEW_INCOMING_MM_CONSTRAINT,
+                            null, Mms.DATE + " desc");
 
         if (cursor == null) {
             return;
@@ -643,6 +628,8 @@ public class MessagingNotification {
 
                 String subject = getMmsSubject(
                         cursor.getString(COLUMN_SUBJECT), cursor.getInt(COLUMN_SUBJECT_CS));
+                subject = MessageUtils.cleanseMmsSubject(context, subject);
+
                 long threadId = cursor.getLong(COLUMN_THREAD_ID);
                 long timeMillis = cursor.getLong(COLUMN_DATE) * 1000;
 
@@ -651,8 +638,7 @@ public class MessagingNotification {
                             ", addr = " + address + ", thread_id=" + threadId);
                 }
 
-                // Extract the message and/or an attached picture from the first
-                // slide
+                // Extract the message and/or an attached picture from the first slide
                 Bitmap attachedPicture = null;
                 String messageBody = null;
                 int attachmentType = WorkingMessage.TEXT;
@@ -660,7 +646,7 @@ public class MessagingNotification {
                     GenericPdu pdu = sPduPersister.load(msgUri);
                     if (pdu != null && pdu instanceof MultimediaMessagePdu) {
                         SlideshowModel slideshow = SlideshowModel.createFromPduBody(context,
-                                ((MultimediaMessagePdu) pdu).getBody());
+                                ((MultimediaMessagePdu)pdu).getBody());
                         attachmentType = getAttachmentType(slideshow);
                         SlideModel firstSlide = slideshow.get(0);
                         if (firstSlide != null) {
@@ -675,6 +661,7 @@ public class MessagingNotification {
                     }
                 } catch (final MmsException e) {
                     Log.e(TAG, "MmsException loading uri: " + msgUri, e);
+                    continue;   // skip this bad boy -- don't generate an empty notification
                 }
 
                 NotificationInfo info = getNewMessageNotificationInfo(context,
@@ -687,7 +674,7 @@ public class MessagingNotification {
                         contact,
                         attachmentType);
 
-                sNotificationSet.add(info);
+                notificationSet.add(info);
 
                 threads.add(threadId);
             }
@@ -696,8 +683,7 @@ public class MessagingNotification {
         }
     }
 
-    // Look at the passed in slideshow and determine what type of attachment it
-    // is.
+    // Look at the passed in slideshow and determine what type of attachment it is.
     private static int getAttachmentType(SlideshowModel slideshow) {
         int slideCount = slideshow.size();
 
@@ -725,8 +711,8 @@ public class MessagingNotification {
     private static final MmsSmsDeliveryInfo getSmsNewDeliveryInfo(Context context) {
         ContentResolver resolver = context.getContentResolver();
         Cursor cursor = SqliteWrapper.query(context, resolver, Sms.CONTENT_URI,
-                SMS_STATUS_PROJECTION, NEW_DELIVERY_SM_CONSTRAINT,
-                null, Sms.DATE);
+                    SMS_STATUS_PROJECTION, NEW_DELIVERY_SM_CONSTRAINT,
+                    null, Sms.DATE);
 
         if (cursor == null) {
             return null;
@@ -744,7 +730,7 @@ public class MessagingNotification {
             String name = contact.getNameAndNumber();
 
             return new MmsSmsDeliveryInfo(context.getString(R.string.delivery_toast_body, name),
-                    timeMillis);
+                timeMillis);
 
         } finally {
             cursor.close();
@@ -752,11 +738,11 @@ public class MessagingNotification {
     }
 
     private static final void addSmsNotificationInfos(
-            Context context, Set<Long> threads) {
+            Context context, Set<Long> threads, SortedSet<NotificationInfo> notificationSet) {
         ContentResolver resolver = context.getContentResolver();
         Cursor cursor = SqliteWrapper.query(context, resolver, Sms.CONTENT_URI,
-                SMS_STATUS_PROJECTION, NEW_INCOMING_SM_CONSTRAINT,
-                null, Sms.DATE + " desc");
+                            SMS_STATUS_PROJECTION, NEW_INCOMING_SM_CONSTRAINT,
+                            null, Sms.DATE + " desc");
 
         if (cursor == null) {
             return;
@@ -782,12 +768,13 @@ public class MessagingNotification {
                             ", addr=" + address + ", thread_id=" + threadId);
                 }
 
+
                 NotificationInfo info = getNewMessageNotificationInfo(context, true /* isSms */,
                         address, message, null /* subject */,
                         threadId, timeMillis, null /* attachmentBitmap */,
                         contact, WorkingMessage.TEXT);
 
-                sNotificationSet.add(info);
+                notificationSet.add(info);
 
                 threads.add(threadId);
                 threads.add(cursor.getLong(COLUMN_THREAD_ID));
@@ -829,16 +816,18 @@ public class MessagingNotification {
         NotificationManager nm = (NotificationManager) context.getSystemService(
                 Context.NOTIFICATION_SERVICE);
 
+        Log.d(TAG, "cancelNotification");
         nm.cancel(notificationId);
     }
 
     private static void updateDeliveryNotification(final Context context,
-            boolean isStatusMessage,
-            final CharSequence message,
-            final long timeMillis) {
+                                                   boolean isStatusMessage,
+                                                   final CharSequence message,
+                                                   final long timeMillis) {
         if (!isStatusMessage) {
             return;
         }
+
 
         if (!MessagingPreferenceActivity.getNotificationEnabled(context)) {
             return;
@@ -847,25 +836,25 @@ public class MessagingNotification {
         sToastHandler.post(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(context, message, (int) timeMillis).show();
+                Toast.makeText(context, message, (int)timeMillis).show();
             }
         });
     }
 
     /**
-     * updateNotification is *the* main function for building the actual
-     * notification handed to the NotificationManager
-     * 
+     * updateNotification is *the* main function for building the actual notification handed to
+     * the NotificationManager
      * @param context
      * @param isNew if we've got a new message, show the ticker
      * @param uniqueThreadCount
+     * @param notificationSet the set of notifications to display
      */
     private static void updateNotification(
             Context context,
             boolean isNew,
-            int uniqueThreadCount) {
-        // If the user has turned off notifications in settings, don't do any
-        // notifying.
+            int uniqueThreadCount,
+            SortedSet<NotificationInfo> notificationSet) {
+        // If the user has turned off notifications in settings, don't do any notifying.
         if (!MessagingPreferenceActivity.getNotificationEnabled(context)) {
             if (DEBUG) {
                 Log.d(TAG, "updateNotification: notifications turned off in prefs, bailing");
@@ -873,10 +862,9 @@ public class MessagingNotification {
             return;
         }
 
-        // Figure out what we've got -- whether all sms's, mms's, or a mixture
-        // of both.
-        int messageCount = sNotificationSet.size();
-        NotificationInfo mostRecentNotification = sNotificationSet.first();
+        // Figure out what we've got -- whether all sms's, mms's, or a mixture of both.
+        final int messageCount = notificationSet.size();
+        NotificationInfo mostRecentNotification = notificationSet.first();
 
         final Notification.Builder noti = new Notification.Builder(context)
                 .setWhen(mostRecentNotification.mTimeMillis);
@@ -892,16 +880,14 @@ public class MessagingNotification {
         // user to the conversation list instead of the specific thread.
 
         // Cases:
-        // 1) single message from single thread - intent goes to
-        // ComposeMessageActivity
-        // 2) multiple messages from single thread - intent goes to
-        // ComposeMessageActivity
-        // 3) messages from multiple threads - intent goes to ConversationList
+        //   1) single message from single thread - intent goes to ComposeMessageActivity
+        //   2) multiple messages from single thread - intent goes to ComposeMessageActivity
+        //   3) messages from multiple threads - intent goes to ConversationList
 
         final Resources res = context.getResources();
         String title = null;
         Bitmap avatar = null;
-        if (uniqueThreadCount > 1) { // messages from multiple threads
+        if (uniqueThreadCount > 1) {    // messages from multiple threads
             Intent mainActivityIntent = new Intent(Intent.ACTION_MAIN);
 
             mainActivityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
@@ -911,21 +897,19 @@ public class MessagingNotification {
             mainActivityIntent.setType("vnd.android-dir/mms-sms");
             taskStackBuilder.addNextIntent(mainActivityIntent);
             title = context.getString(R.string.message_count_notification, messageCount);
-        } else { // same thread, single or multiple messages
+        } else {    // same thread, single or multiple messages
             title = mostRecentNotification.mTitle;
-            BitmapDrawable contactDrawable = (BitmapDrawable) mostRecentNotification.mSender
+            BitmapDrawable contactDrawable = (BitmapDrawable)mostRecentNotification.mSender
                     .getAvatar(context, null);
             if (contactDrawable != null) {
-                // Show the sender's avatar as the big icon. Contact bitmaps are
-                // 96x96 so we
-                // have to scale 'em up to 128x128 to fill the whole
-                // notification large icon.
+                // Show the sender's avatar as the big icon. Contact bitmaps are 96x96 so we
+                // have to scale 'em up to 128x128 to fill the whole notification large icon.
                 avatar = contactDrawable.getBitmap();
                 if (avatar != null) {
                     final int idealIconHeight =
-                            res.getDimensionPixelSize(android.R.dimen.notification_large_icon_height);
+                        res.getDimensionPixelSize(android.R.dimen.notification_large_icon_height);
                     final int idealIconWidth =
-                            res.getDimensionPixelSize(android.R.dimen.notification_large_icon_width);
+                         res.getDimensionPixelSize(android.R.dimen.notification_large_icon_width);
                     if (avatar.getHeight() < idealIconHeight) {
                         // Scale this image to fit the intended size
                         avatar = Bitmap.createScaledBitmap(
@@ -948,12 +932,10 @@ public class MessagingNotification {
 
         // Update the notification.
         noti.setContentTitle(title)
-                .setContentIntent(
-                        taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT))
-                .addKind(Notification.KIND_MESSAGE)
-                .setPriority(Notification.PRIORITY_DEFAULT); // TODO: set based
-                                                             // on contact
-                                                             // coming
+            .setContentIntent(
+                    taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT))
+            .addKind(Notification.KIND_MESSAGE)
+            .setPriority(Notification.PRIORITY_DEFAULT);     // TODO: set based on contact coming
                                                              // from a favorite.
 
         int defaults = 0;
@@ -963,12 +945,12 @@ public class MessagingNotification {
             String vibrateWhen;
             if (sp.contains(MessagingPreferenceActivity.NOTIFICATION_VIBRATE_WHEN)) {
                 vibrateWhen =
-                        sp.getString(MessagingPreferenceActivity.NOTIFICATION_VIBRATE_WHEN, null);
+                    sp.getString(MessagingPreferenceActivity.NOTIFICATION_VIBRATE_WHEN, null);
             } else if (sp.contains(MessagingPreferenceActivity.NOTIFICATION_VIBRATE)) {
                 vibrateWhen =
                         sp.getBoolean(MessagingPreferenceActivity.NOTIFICATION_VIBRATE, false) ?
-                                context.getString(R.string.prefDefault_vibrate_true) :
-                                context.getString(R.string.prefDefault_vibrate_false);
+                    context.getString(R.string.prefDefault_vibrate_true) :
+                    context.getString(R.string.prefDefault_vibrate_false);
             } else {
                 vibrateWhen = context.getString(R.string.prefDefault_vibrateWhen);
             }
@@ -980,9 +962,9 @@ public class MessagingNotification {
             boolean vibrateAlways = vibrateWhen.equals("always");
             boolean vibrateSilent = vibrateWhen.equals("silent");
             AudioManager audioManager =
-                    (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+                (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
             boolean nowSilent =
-                    audioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE;
+                audioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE;
 
             if ((vibrateAlways || vibrateSilent && nowSilent) && (vibrateOnCall || (!vibrateOnCall && callStateIdle))) {
                 /* WAS: notificationdefaults |= Notification.DEFAULT_VIBRATE;*/
@@ -1004,8 +986,8 @@ public class MessagingNotification {
             }
         }
 
+        // Set light defaults
         defaults |= Notification.DEFAULT_LIGHTS;
-
         noti.setDefaults(defaults);
 
         // set up delete intent
@@ -1031,74 +1013,37 @@ public class MessagingNotification {
         // Start getting the notification ready
         final Notification notification;
 
-        // make an intent to send info to quick reply class
-        // do not pull the extras if this is not an SMS
-        // TODO: add MMS support later
-        Intent quickReply = null;
-        if (mostRecentNotification.mIsSms) {
-            quickReply = new Intent();
-            quickReply.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_SINGLE_TOP
-                    | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            quickReply.setClass(context, com.android.mms.ui.QuickReply.class);
-            quickReply.putExtra("number", mostRecentNotification.mSender.getNumber());
-            quickReply.putExtra("name", mostRecentNotification.mSender.getName());
-            quickReply.putExtra("body", mostRecentNotification.mMessage.toString());
-            quickReply.putExtra("threadId", mostRecentNotification.mThreadId);
-            quickReply.putExtra("count", uniqueThreadCount);
+        if (messageCount == 1 || uniqueThreadCount == 1) {
+            // Add the Quick Reply action only if the pop-up won't be shown already
+            if (!qmPopupEnabled && qmIntent != null) {
 
-            // get the messageId so we can mark as read
-            Long messageId = null;
-            messageId = getSmsMessageId(context, SMS_INBOX_URI);
-            if (messageId != null) {
-                quickReply.putExtra("msgId", messageId);
-            }
+                // This is a QR, we should show the keyboard when the user taps to reply
+                qmIntent.putExtra(QuickMessagePopup.QR_SHOW_KEYBOARD_EXTRA, true);
 
-            // get the contact avatar
-            BitmapDrawable contactDrawable = (BitmapDrawable) mostRecentNotification.mSender
-                    .getAvatar(context, null);
-            Bitmap contactPic = null;
-            if (contactDrawable != null) {
-                contactPic = contactDrawable.getBitmap();
-                if (contactPic != null) {
-                    quickReply.putExtra("avatar", contactPic);
-                }
-            }
-
-            // grab all texts from same person to build into one string
-            if (uniqueThreadCount == 1) {
-                SpannableStringBuilder buf = new SpannableStringBuilder();
-                NotificationInfo infos[] =
-                        sNotificationSet.toArray(new NotificationInfo[sNotificationSet.size()]);
-                int len = infos.length;
-                for (int i = len - 1; i >= 0; i--) {
-                    NotificationInfo info = infos[i];
-
-                    buf.append(info.formatBigMessage(context));
-
-                    if (i != 0) {
-                        buf.append('\n');
-                    }
-                }
-                quickReply.putExtra("bodies", buf);
-            }
-        }
-
-        if ((messageCount == 1 || uniqueThreadCount == 1) && mostRecentNotification.mIsSms) {
-            // first add the call back option
-            CharSequence callBack = context.getText(R.string.quick_call_back);
-            Intent call = new Intent(Intent.ACTION_CALL);
-            call.setData(mostRecentNotification.mSender.getPhoneUri());
-            PendingIntent piCall = PendingIntent.getActivity(context, 0, call,
-                    PendingIntent.FLAG_UPDATE_CURRENT);
-            noti.addAction(R.drawable.ic_menu_call, callBack, piCall);
-            // second add the quick reply action
-            if (quickReply != null) {
-                CharSequence quickText = context.getText(R.string.quick_reply_sms);
-                PendingIntent piText = PendingIntent.getActivity(context, 0, quickReply,
+                // Create the Quick reply pending intent and add it to the notification
+                CharSequence qmText = context.getText(R.string.qm_quick_reply);
+                PendingIntent qmPendingIntent = PendingIntent.getActivity(context, 0, qmIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT);
-                noti.addAction(R.drawable.ic_menu_msg_compose_holo_dark, quickText, piText);
+                noti.addAction(R.drawable.ic_reply, qmText, qmPendingIntent);
             }
+
+            // Add the 'Mark as read' action
+            CharSequence markReadText = context.getText(R.string.qm_mark_read);
+            Intent mrIntent = new Intent();
+            mrIntent.setClass(context, QmMarkRead.class);
+            mrIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            mrIntent.putExtra(QmMarkRead.SMS_THREAD_ID, mostRecentNotification.mThreadId);
+            PendingIntent mrPendingIntent = PendingIntent.getActivity(context, 0, mrIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+            noti.addAction(R.drawable.ic_menu_done_holo_dark, markReadText, mrPendingIntent);
+
+            // Add the Call action
+            CharSequence callText = context.getText(R.string.menu_call);
+            Intent callIntent = new Intent(Intent.ACTION_CALL);
+            callIntent.setData(mostRecentNotification.mSender.getPhoneUri());
+            PendingIntent callPendingIntent = PendingIntent.getActivity(context, 0, callIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+            noti.addAction(R.drawable.ic_menu_call, callText, callPendingIntent);
 
         }
 
@@ -1112,27 +1057,28 @@ public class MessagingNotification {
                 // The message has a picture, show that
 
                 notification = new Notification.BigPictureStyle(noti)
-                        .bigPicture(mostRecentNotification.mAttachmentBitmap)
-                        // This sets the text for the expanded picture form:
-                        .setSummaryText(mostRecentNotification.formatPictureMessage(context))
-                        .build();
+                    .bigPicture(mostRecentNotification.mAttachmentBitmap)
+                    // This sets the text for the expanded picture form:
+                    .setSummaryText(mostRecentNotification.formatPictureMessage(context))
+                    .build();
             } else {
-                // Show a single notification -- big style with the text of the
-                // whole message
+                // Show a single notification -- big style with the text of the whole message
                 notification = new Notification.BigTextStyle(noti)
-                        .bigText(mostRecentNotification.formatBigMessage(context))
-                        .build();
+                    .bigText(mostRecentNotification.formatBigMessage(context))
+                    .build();
+            }
+            if (DEBUG) {
+                Log.d(TAG, "updateNotification: single message notification");
             }
         } else {
             // We've got multiple messages
             if (uniqueThreadCount == 1) {
                 // We've got multiple messages for the same thread.
-                // Starting with the oldest new message, display the full text
-                // of each message.
+                // Starting with the oldest new message, display the full text of each message.
                 // Begin a line for each subsequent message.
                 SpannableStringBuilder buf = new SpannableStringBuilder();
                 NotificationInfo infos[] =
-                        sNotificationSet.toArray(new NotificationInfo[sNotificationSet.size()]);
+                        notificationSet.toArray(new NotificationInfo[messageCount]);
                 int len = infos.length;
                 for (int i = len - 1; i >= 0; i--) {
                     NotificationInfo info = infos[i];
@@ -1147,21 +1093,22 @@ public class MessagingNotification {
                 noti.setContentText(context.getString(R.string.message_count_notification,
                         messageCount));
 
-                // Show a single notification -- big style with the text of all
-                // the messages
+                // Show a single notification -- big style with the text of all the messages
                 notification = new Notification.BigTextStyle(noti)
-                        .bigText(buf)
-                        // Forcibly show the last line, with the app's smallIcon
-                        // in it, if we
-                        // kicked the smallIcon out with an avatar bitmap
-                        .setSummaryText((avatar == null) ? null : " ")
-                        .build();
+                    .bigText(buf)
+                    // Forcibly show the last line, with the app's smallIcon in it, if we
+                    // kicked the smallIcon out with an avatar bitmap
+                    .setSummaryText((avatar == null) ? null : " ")
+                    .build();
+                if (DEBUG) {
+                    Log.d(TAG, "updateNotification: multi messages for single thread");
+                }
             } else {
                 // Build a set of the most recent notification per threadId.
-                HashSet<Long> uniqueThreads = new HashSet<Long>(sNotificationSet.size());
+                HashSet<Long> uniqueThreads = new HashSet<Long>(messageCount);
                 ArrayList<NotificationInfo> mostRecentNotifPerThread =
                         new ArrayList<NotificationInfo>();
-                Iterator<NotificationInfo> notifications = sNotificationSet.iterator();
+                Iterator<NotificationInfo> notifications = notificationSet.iterator();
                 while (notifications.hasNext()) {
                     NotificationInfo notificationInfo = notifications.next();
                     if (!uniqueThreads.contains(notificationInfo.mThreadId)) {
@@ -1170,17 +1117,15 @@ public class MessagingNotification {
                     }
                 }
                 // When collapsed, show all the senders like this:
-                // Fred Flinstone, Barry Manilow, Pete...
+                //     Fred Flinstone, Barry Manilow, Pete...
                 noti.setContentText(formatSenders(context, mostRecentNotifPerThread));
                 Notification.InboxStyle inboxStyle = new Notification.InboxStyle(noti);
 
-                // We have to set the summary text to non-empty so the content
-                // text doesn't show
+                // We have to set the summary text to non-empty so the content text doesn't show
                 // up when expanded.
                 inboxStyle.setSummaryText(" ");
 
-                // At this point we've got multiple messages in multiple
-                // threads. We only
+                // At this point we've got multiple messages in multiple threads. We only
                 // want to show the most recent message per thread, which are in
                 // mostRecentNotifPerThread.
                 int uniqueThreadMessageCount = mostRecentNotifPerThread.size();
@@ -1198,25 +1143,21 @@ public class MessagingNotification {
             }
         }
 
-        // Post the notification
-	   nm.notify(NOTIFICATION_ID, notification);
-	  
-	    // Display QuickMessage if enabled in preferences and this is an Sms message
-        if (MessagingPreferenceActivity.getQuickMessageEnabled(context)
-                && mostRecentNotification.mIsSms) {
-
-        // Don't show the QuickMessage if the user is in a call or the phone is ringing
         // Trigger the QuickMessage pop-up activity if enabled
+        // But don't show the QuickMessage if the user is in a call or the phone is ringing
         if (qmPopupEnabled && qmIntent != null) {
             TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
             if (tm.getCallState() == TelephonyManager.CALL_STATE_IDLE && !ConversationList.mIsRunning && !ComposeMessageActivity.mIsRunning) {
+                // Since a QM Popup may wake and unlock we need to prevent the light from being dismissed
+                notification.flags |= Notification.FLAG_FORCE_LED_SCREEN_OFF;
+
+                // Show the popup
                 context.startActivity(qmIntent);
             }
         }
 
         // Post the notification
         nm.notify(NOTIFICATION_ID, notification);
-        }
     }
 
     protected static CharSequence buildTickerMessage(
@@ -1274,26 +1215,20 @@ public class MessagingNotification {
         }
 
         // Strategy:
-        // a. If there is a single failure notification, tapping on the
-        // notification goes
-        // to the compose view.
-        // b. If there are two failure it stays in the thread view. Selecting
-        // one undelivered
-        // thread will dismiss one undelivered notification but will still
-        // display the
-        // notification.If you select the 2nd undelivered one it will dismiss
-        // the notification.
+        // a. If there is a single failure notification, tapping on the notification goes
+        //    to the compose view.
+        // b. If there are two failure it stays in the thread view. Selecting one undelivered
+        //    thread will dismiss one undelivered notification but will still display the
+        //    notification.If you select the 2nd undelivered one it will dismiss the notification.
 
         long[] msgThreadId = {0, 1};    // Dummy initial values, just to initialize the memory
         int totalFailedCount = getUndeliveredMessageCount(context, msgThreadId);
         if (totalFailedCount == 0 && !isDownload) {
             return;
         }
-        // The getUndeliveredMessageCount method puts a non-zero value in
-        // msgThreadId[1] if all
+        // The getUndeliveredMessageCount method puts a non-zero value in msgThreadId[1] if all
         // failures are from the same thread.
-        // If isDownload is true, we're dealing with 1 specific failure;
-        // therefore "all failed" are
+        // If isDownload is true, we're dealing with 1 specific failure; therefore "all failed" are
         // indeed in the same thread since there's only 1.
         boolean allFailedInSameThread = (msgThreadId[1] != 0) || isDownload;
 
@@ -1307,8 +1242,8 @@ public class MessagingNotification {
             title = context.getString(R.string.notification_failed_multiple_title);
         } else {
             title = isDownload ?
-                    context.getString(R.string.message_download_failed_title) :
-                    context.getString(R.string.message_send_failed_title);
+                        context.getString(R.string.message_download_failed_title) :
+                        context.getString(R.string.message_send_failed_title);
 
             description = context.getString(R.string.message_failed_body);
         }
@@ -1317,8 +1252,7 @@ public class MessagingNotification {
         if (allFailedInSameThread) {
             failedIntent = new Intent(context, ComposeMessageActivity.class);
             if (isDownload) {
-                // When isDownload is true, the valid threadId is passed into
-                // this function.
+                // When isDownload is true, the valid threadId is passed into this function.
                 failedIntent.putExtra("failed_download_flag", true);
             } else {
                 threadId = msgThreadId[0];
@@ -1336,7 +1270,7 @@ public class MessagingNotification {
         notification.tickerText = title;
 
         notification.setLatestEventInfo(context, title, description,
-                taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT));
+                taskStackBuilder.getPendingIntent(0,  PendingIntent.FLAG_UPDATE_CURRENT));
 
         if (noisy) {
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
@@ -1362,16 +1296,13 @@ public class MessagingNotification {
     }
 
     /**
-     * Query the DB and return the number of undelivered messages (total for
-     * both SMS and MMS)
-     * 
+     * Query the DB and return the number of undelivered messages (total for both SMS and MMS)
      * @param context The context
-     * @param threadIdResult A container to put the result in, according to the
-     *            following rules: threadIdResult[0] contains the thread id of
-     *            the first message. threadIdResult[1] is nonzero if the thread
-     *            ids of all the messages are the same. You can pass in null for
-     *            threadIdResult. You can pass in a threadIdResult of size 1 to
-     *            avoid the comparison of each thread id.
+     * @param threadIdResult A container to put the result in, according to the following rules:
+     *  threadIdResult[0] contains the thread id of the first message.
+     *  threadIdResult[1] is nonzero if the thread ids of all the messages are the same.
+     *  You can pass in null for threadIdResult.
+     *  You can pass in a threadIdResult of size 1 to avoid the comparison of each thread id.
      */
     private static int getUndeliveredMessageCount(Context context, long[] threadIdResult) {
         Cursor undeliveredCursor = SqliteWrapper.query(context, context.getContentResolver(),
@@ -1385,8 +1316,7 @@ public class MessagingNotification {
                 threadIdResult[0] = undeliveredCursor.getLong(0);
 
                 if (threadIdResult.length >= 2) {
-                    // Test to see if all the undelivered messages belong to the
-                    // same thread.
+                    // Test to see if all the undelivered messages belong to the same thread.
                     long firstId = threadIdResult[0];
                     while (undeliveredCursor.moveToNext()) {
                         if (undeliveredCursor.getLong(0) != firstId) {
@@ -1394,8 +1324,7 @@ public class MessagingNotification {
                             break;
                         }
                     }
-                    threadIdResult[1] = firstId; // non-zero if all ids are the
-                                                 // same
+                    threadIdResult[1] = firstId;    // non-zero if all ids are the same
                 }
             }
         } finally {
@@ -1422,8 +1351,7 @@ public class MessagingNotification {
     }
 
     /**
-     * If all the undelivered messages belong to "threadId", cancel the
-     * notification.
+     *  If all the undelivered messages belong to "threadId", cancel the notification.
      */
     public static void updateSendFailedNotificationForThread(Context context, long threadId) {
         long[] msgThreadId = {0, 0};
@@ -1437,14 +1365,14 @@ public class MessagingNotification {
     private static int getDownloadFailedMessageCount(Context context) {
         // Look for any messages in the MMS Inbox that are of the type
         // NOTIFICATION_IND (i.e. not already downloaded) and in the
-        // permanent failure state. If there are none, cancel any
+        // permanent failure state.  If there are none, cancel any
         // failed download notification.
         Cursor c = SqliteWrapper.query(context, context.getContentResolver(),
                 Mms.Inbox.CONTENT_URI, null,
                 Mms.MESSAGE_TYPE + "=" +
-                        String.valueOf(PduHeaders.MESSAGE_TYPE_NOTIFICATION_IND) +
-                        " AND " + Mms.STATUS + "=" +
-                        String.valueOf(DownloadManager.STATE_PERMANENT_FAILURE),
+                    String.valueOf(PduHeaders.MESSAGE_TYPE_NOTIFICATION_IND) +
+                " AND " + Mms.STATUS + "=" +
+                    String.valueOf(DownloadManager.STATE_PERMANENT_FAILURE),
                 null, null);
         if (c == null) {
             return 0;
@@ -1469,54 +1397,41 @@ public class MessagingNotification {
     }
 
     /**
-     * Get the message ID of the SMS message with the given URI
-     * 
-     * @param context The context
-     * @param uri The URI of the SMS message
-     * @return The message id
-     */
-    private static long getSmsMessageId(Context context, Uri uri) {
-        long messageId = 0;
-        Cursor cursor = context.getContentResolver().query(
-                uri,
-                new String[] {
-                    "_id"
-                },
-                null, null, null);
-        if (cursor.moveToFirst()) {
-            messageId = cursor.getLong(cursor.getColumnIndex("_id"));
-        }
-        if (cursor != null) {
-            cursor.close();
-        }
-        return messageId;
-    }
-
-    /**
      * Get the thread ID of the SMS message with the given URI
-     * 
      * @param context The context
      * @param uri The URI of the SMS message
      * @return The thread ID, or THREAD_NONE if the URI contains no entries
      */
     public static long getSmsThreadId(Context context, Uri uri) {
         Cursor cursor = SqliteWrapper.query(
-                context,
-                context.getContentResolver(),
-                uri,
-                SMS_THREAD_ID_PROJECTION,
-                null,
-                null,
-                null);
+            context,
+            context.getContentResolver(),
+            uri,
+            SMS_THREAD_ID_PROJECTION,
+            null,
+            null,
+            null);
 
         if (cursor == null) {
+            if (DEBUG) {
+                Log.d(TAG, "getSmsThreadId uri: " + uri + " NULL cursor! returning THREAD_NONE");
+            }
             return THREAD_NONE;
         }
 
         try {
             if (cursor.moveToFirst()) {
-                return cursor.getLong(cursor.getColumnIndex(Sms.THREAD_ID));
+                long threadId = cursor.getLong(cursor.getColumnIndex(Sms.THREAD_ID));
+                if (DEBUG) {
+                    Log.d(TAG, "getSmsThreadId uri: " + uri +
+                            " returning threadId: " + threadId);
+                }
+                return threadId;
             } else {
+                if (DEBUG) {
+                    Log.d(TAG, "getSmsThreadId uri: " + uri +
+                            " NULL cursor! returning THREAD_NONE");
+                }
                 return THREAD_NONE;
             }
         } finally {
@@ -1526,7 +1441,6 @@ public class MessagingNotification {
 
     /**
      * Get the thread ID of the MMS message with the given URI
-     * 
      * @param context The context
      * @param uri The URI of the SMS message
      * @return The thread ID, or THREAD_NONE if the URI contains no entries
@@ -1542,13 +1456,25 @@ public class MessagingNotification {
                 null);
 
         if (cursor == null) {
+            if (DEBUG) {
+                Log.d(TAG, "getThreadId uri: " + uri + " NULL cursor! returning THREAD_NONE");
+            }
             return THREAD_NONE;
         }
 
         try {
             if (cursor.moveToFirst()) {
-                return cursor.getLong(cursor.getColumnIndex(Mms.THREAD_ID));
+                long threadId = cursor.getLong(cursor.getColumnIndex(Mms.THREAD_ID));
+                if (DEBUG) {
+                    Log.d(TAG, "getThreadId uri: " + uri +
+                            " returning threadId: " + threadId);
+                }
+                return threadId;
             } else {
+                if (DEBUG) {
+                    Log.d(TAG, "getThreadId uri: " + uri +
+                            " NULL cursor! returning THREAD_NONE");
+                }
                 return THREAD_NONE;
             }
         } finally {

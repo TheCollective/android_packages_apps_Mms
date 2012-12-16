@@ -43,6 +43,6 @@ public class ImageAdapter extends BaseAdapter {
         return imageView;
     }
 
-    // references to your images
+    // references to our images
     private int[] mResIds;
 }

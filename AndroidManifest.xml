@@ -44,18 +44,10 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INSTALL_DRM" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+    <uses-permission android:name="android.permission.WRITE_APN_SETTINGS" />
 
     <!-- Needed for QuickMessage -->
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
-
-    <!-- Grant permission to system apps to access receiver -->
-    <permission android:name="android.permission.MMS_PUSH"
-                android:protectionLevel="signatureOrSystem"
-                android:label="@string/label_mms_push"
-                android:description="@string/desc_mms_push"/>
-    <uses-permission android:name="android.permission.MMS_PUSH"/>
 
     <application android:name="MmsApp"
             android:label="@string/app_label"
@@ -64,10 +56,10 @@
             android:allowTaskReparenting="true">
 
         <service android:name=".transaction.TransactionService"
-                 android:exported="true" />
+                 android:exported="false" />
 
         <service android:name=".transaction.SmsReceiverService"
-                 android:exported="true" />
+                 android:exported="false" />
 
         <activity android:name=".ui.ConversationList"
                   android:label="@string/app_label"
@@ -95,7 +87,7 @@
 
         <activity android:name=".ui.ComposeMessageActivity"
                   android:configChanges="orientation|screenSize|keyboardHidden"
-                  android:windowSoftInputMode="stateHidden"
+                  android:windowSoftInputMode="stateHidden|adjustResize"
                   android:theme="@style/MmsHoloTheme"
                   android:parentActivityName=".ui.ConversationList"
                   android:launchMode="singleTop" >
@@ -137,11 +129,6 @@
            </intent-filter>
         </activity>
 
-        <activity android:name=".ui.QuickReply"
-            android:theme="@android:style/Theme.Holo.Dialog"
-            android:taskAffinity="com.android.mms.ui.QuickReply"
-            android:excludeFromRecents="true"/>
-
         <activity-alias android:name=".ui.ForwardMessageActivity"
                   android:targetActivity=".ui.ComposeMessageActivity"
                   android:configChanges="orientation|screenSize|keyboardHidden"
@@ -176,6 +163,10 @@
         <activity android:name=".ui.SlideshowEditActivity"
             android:theme="@style/MmsHoloTheme"
             android:label="@string/edit_slideshow_activity" />
+
+        <activity android:name=".ui.RecipientListActivity"
+            android:theme="@style/MmsHoloTheme"
+            android:label="@string/recipient_list_activity" />
 
         <activity android:name=".ui.SlideEditorActivity"
             android:windowSoftInputMode="adjustResize"
@@ -215,13 +206,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
-        </receiver>
-
-        <receiver android:name=".transaction.MmsSystemPushMsgReceiver"
-                  android:permission="android.permission.MMS_PUSH">
-                  <intent-filter>
-                      <action android:name="android.intent.action.MMS_PUSH" />
-                  </intent-filter>
         </receiver>
 
         <activity android:name=".ui.ManageSimMessages"
@@ -302,6 +286,7 @@
 
         <!-- Search Suggestions Provider -->
         <provider android:name="SuggestionsProvider"
+            android:exported="true"
             android:readPermission="android.permission.READ_SMS"
             android:authorities="com.android.mms.SuggestionsProvider" >
             <path-permission
@@ -324,6 +309,7 @@
         </service>
 
         <provider android:name="TempFileProvider"
+                  android:exported="true"
                   android:authorities="mms_temp_file"
                   android:multiprocess="true" />
 
@@ -349,17 +335,21 @@
                  android:permission="android.permission.BIND_REMOTEVIEWS"
                  android:exported="false" />
 
+        <!-- Templates support -->
         <activity
             android:name=".templates.TemplatesListActivity"
             android:theme="@style/MmsHoloTheme"
             android:label="@string/template_list_title" >
         </activity>
+
         <activity android:name=".templates.TemplateEditor"
             android:theme="@style/MmsHoloTheme"
             android:label="@string/template_new_title">
         </activity>
+
         <provider
             android:name=".templates.TemplatesProvider"
+            android:exported="true"
             android:authorities="com.android.cm.mms" />
 
         <!-- QuickMessage support -->
@@ -368,7 +358,7 @@
              be associated with the main messaging task and if launched
              from a notification will not bring the rest of the messaging app
              to the foreground.We exclude from recent apps since this is accessible
-             through a notification when appropriate.  -->
+             through a notification when appropriate. -->
          <activity
             android:name=".quickmessage.QuickMessagePopup"
             android:theme="@android:style/Theme.Holo.Dialog"
@@ -378,7 +368,14 @@
             android:excludeFromRecents="true"
             android:exported="true" />
 
-        <receiver android:name=".quickmessage.ClearAllReceiver" />
+         <activity
+            android:name=".quickmessage.QmMarkRead"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:exported="true" />
+
+         <receiver android:name=".quickmessage.ClearAllReceiver" />
 
         </application>
 </manifest>

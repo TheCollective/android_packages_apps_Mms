@@ -25,17 +25,15 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.Paint.FontMetricsInt;
-import android.graphics.Path;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract.Profile;
 import android.provider.Telephony.Sms;
 import android.telephony.PhoneNumberUtils;
@@ -61,7 +59,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.android.mms.LogTag;
 import com.android.mms.MmsApp;
 import com.android.mms.R;
 import com.android.mms.data.Contact;
@@ -73,6 +70,7 @@ import com.android.mms.transaction.TransactionBundle;
 import com.android.mms.transaction.TransactionService;
 import com.android.mms.util.DownloadManager;
 import com.android.mms.util.ItemLoadedCallback;
+import com.android.mms.util.EmojiParser;
 import com.android.mms.util.SmileyParser;
 import com.android.mms.util.ThumbnailManager.ImageLoaded;
 import com.google.android.mms.ContentType;
@@ -107,15 +105,12 @@ public class MessageListItem extends LinearLayout implements
     private String mDefaultCountryIso;
     private TextView mDateView;
     public View mMessageBlock;
-    private Path mPathRight;
-    private Path mPathLeft;
-    private Paint mPaint;
     private QuickContactDivot mAvatar;
-    private boolean mIsLastItemInList;
     static private Drawable sDefaultContactImage;
     private Presenter mPresenter;
     private int mPosition;      // for debugging
     private ImageLoadedCallback mImageLoadedCallback;
+    private boolean mMultiRecipients;
 
     public MessageListItem(Context context) {
         super(context);
@@ -151,10 +146,17 @@ public class MessageListItem extends LinearLayout implements
         mMessageBlock = findViewById(R.id.message_block);
     }
 
-    public void bind(MessageItem msgItem, boolean isLastItem, int position) {
+    public void bind(MessageItem msgItem, boolean convHasMultiRecipients, int position) {
+        if (DEBUG) {
+            Log.v(TAG, "bind for item: " + position + " old: " +
+                   (mMessageItem != null ? mMessageItem.toString() : "NULL" ) +
+                    " new " + msgItem.toString());
+        }
+        boolean sameItem = mMessageItem != null && mMessageItem.mMsgId == msgItem.mMsgId;
         mMessageItem = msgItem;
-        mIsLastItemInList = isLastItem;
+
         mPosition = position;
+        mMultiRecipients = convHasMultiRecipients;
 
         setLongClickable(false);
         setClickable(false);    // let the list view handle clicks on the item normally. When
@@ -167,7 +169,7 @@ public class MessageListItem extends LinearLayout implements
                 bindNotifInd();
                 break;
             default:
-                bindCommonMessage();
+                bindCommonMessage(sameItem);
                 break;
         }
     }
@@ -175,7 +177,6 @@ public class MessageListItem extends LinearLayout implements
     public void unbind() {
         // Clear all references to the message item, which can contain attachments and other
         // memory-intensive objects
-        mMessageItem = null;
         if (mImageView != null) {
             // Because #setOnClickListener may have set the listener to an object that has the
             // message item in its closure.
@@ -206,12 +207,12 @@ public class MessageListItem extends LinearLayout implements
                                 + String.valueOf((mMessageItem.mMessageSize + 1023) / 1024)
                                 + mContext.getString(R.string.kilobyte);
 
-        mBodyTextView.setText(formatMessage(mMessageItem, mMessageItem.mContact, null,
+        mBodyTextView.setText(formatMessage(mMessageItem, null,
                                             mMessageItem.mSubject,
                                             mMessageItem.mHighlight,
                                             mMessageItem.mTextContentType));
 
-        mDateView.setText(msgSizeText + " " + mMessageItem.mTimestamp);
+        mDateView.setText(buildTimestampLine(msgSizeText + " " + mMessageItem.mTimestamp));
 
         switch (mMessageItem.getMmsDownloadStatus()) {
             case DownloadManager.STATE_DOWNLOADING:
@@ -260,6 +261,16 @@ public class MessageListItem extends LinearLayout implements
         updateAvatarView(mMessageItem.mAddress, false);
     }
 
+    private String buildTimestampLine(String timestamp) {
+        if (!mMultiRecipients || mMessageItem.isMe() || TextUtils.isEmpty(mMessageItem.mContact)) {
+            // Never show "Me" for messages I sent.
+            return timestamp;
+        }
+        // This is a group conversation, show the sender's name on the same line as the timestamp.
+        return mContext.getString(R.string.message_timestamp_format, mMessageItem.mContact,
+                timestamp);
+    }
+
     private void showDownloadingAttachment() {
         inflateDownloadControls();
         mDownloadingLabel.setVisibility(View.VISIBLE);
@@ -287,7 +298,7 @@ public class MessageListItem extends LinearLayout implements
         mAvatar.setImageDrawable(avatarDrawable);
     }
 
-    private void bindCommonMessage() {
+    private void bindCommonMessage(final boolean sameItem) {
         if (mDownloadButton != null) {
             mDownloadButton.setVisibility(View.GONE);
             mDownloadingLabel.setVisibility(View.GONE);
@@ -297,9 +308,20 @@ public class MessageListItem extends LinearLayout implements
         // displaying it by the Presenter.
         mBodyTextView.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
 
-        boolean isSelf = Sms.isOutgoingFolder(mMessageItem.mBoxId);
-        String addr = isSelf ? null : mMessageItem.mAddress;
-        updateAvatarView(addr, isSelf);
+        boolean haveLoadedPdu = mMessageItem.isSms() || mMessageItem.mSlideshow != null;
+        // Here we're avoiding reseting the avatar to the empty avatar when we're rebinding
+        // to the same item. This happens when there's a DB change which causes the message item
+        // cache in the MessageListAdapter to get cleared. When an mms MessageItem is newly
+        // created, it has no info in it except the message id. The info is eventually loaded
+        // and bindCommonMessage is called again (see onPduLoaded below). When we haven't loaded
+        // the pdu, we don't want to call updateAvatarView because it
+        // will set the avatar to the generic avatar then when this method is called again
+        // from onPduLoaded, it will reset to the real avatar. This test is to avoid that flash.
+        if (!sameItem || haveLoadedPdu) {
+            boolean isSelf = Sms.isOutgoingFolder(mMessageItem.mBoxId);
+            String addr = isSelf ? null : mMessageItem.mAddress;
+            updateAvatarView(addr, isSelf);
+        }
 
         // Get and/or lazily set the formatted message from/on the
         // MessageItem.  Because the MessageItem instances come from a
@@ -307,14 +329,16 @@ public class MessageListItem extends LinearLayout implements
         // expensive formatMessage() call is very high.
         CharSequence formattedMessage = mMessageItem.getCachedFormattedMessage();
         if (formattedMessage == null) {
-            formattedMessage = formatMessage(mMessageItem, mMessageItem.mContact,
+            formattedMessage = formatMessage(mMessageItem,
                                              mMessageItem.mBody,
                                              mMessageItem.mSubject,
                                              mMessageItem.mHighlight,
                                              mMessageItem.mTextContentType);
             mMessageItem.setCachedFormattedMessage(formattedMessage);
         }
-        mBodyTextView.setText(formattedMessage);
+        if (!sameItem || haveLoadedPdu) {
+            mBodyTextView.setText(formattedMessage);
+        }
 
         // Debugging code to put the URI of the image attachment in the body of the list item.
         if (DEBUG) {
@@ -336,10 +360,11 @@ public class MessageListItem extends LinearLayout implements
 
         // If we're in the process of sending a message (i.e. pending), then we show a "SENDING..."
         // string in place of the timestamp.
-        mDateView.setText(mMessageItem.isSending() ?
-                mContext.getResources().getString(R.string.sending_message) :
-                    mMessageItem.mTimestamp);
-
+        if (!sameItem || haveLoadedPdu) {
+            mDateView.setText(buildTimestampLine(mMessageItem.isSending() ?
+                    mContext.getResources().getString(R.string.sending_message) :
+                        mMessageItem.mTimestamp));
+        }
         if (mMessageItem.isSms()) {
             showMmsView(false);
             mMessageItem.setOnPduLoaded(null);
@@ -347,10 +372,13 @@ public class MessageListItem extends LinearLayout implements
             if (DEBUG) {
                 Log.v(TAG, "bindCommonMessage for item: " + mPosition + " " +
                         mMessageItem.toString() +
-                        " mMessageItem.mAttachmentType: " + mMessageItem.mAttachmentType);
+                        " mMessageItem.mAttachmentType: " + mMessageItem.mAttachmentType +
+                        " sameItem: " + sameItem);
             }
             if (mMessageItem.mAttachmentType != WorkingMessage.TEXT) {
-                setImage(null, null);
+                if (!sameItem) {
+                    setImage(null, null);
+                }
                 setOnClickListener(mMessageItem);
                 drawPlaybackButton(mMessageItem);
             } else {
@@ -368,7 +396,7 @@ public class MessageListItem extends LinearLayout implements
                         if (messageItem != null && mMessageItem != null &&
                                 messageItem.getMessageId() == mMessageItem.getMessageId()) {
                             mMessageItem.setCachedFormattedMessage(null);
-                            bindCommonMessage();
+                            bindCommonMessage(true);
                         }
                     }
                 });
@@ -498,15 +526,23 @@ public class MessageListItem extends LinearLayout implements
 
     ForegroundColorSpan mColorSpan = null;  // set in ctor
 
-    private CharSequence formatMessage(MessageItem msgItem, String contact, String body,
+    private CharSequence formatMessage(MessageItem msgItem, String body,
                                        String subject, Pattern highlight,
                                        String contentType) {
         SpannableStringBuilder buf = new SpannableStringBuilder();
+
+        SharedPreferences prefs = PreferenceManager
+                .getDefaultSharedPreferences(mContext);
+        boolean enableEmojis = prefs.getBoolean(MessagingPreferenceActivity.ENABLE_EMOJIS, false);
 
         boolean hasSubject = !TextUtils.isEmpty(subject);
         SmileyParser parser = SmileyParser.getInstance();
         if (hasSubject) {
             CharSequence smilizedSubject = parser.addSmileySpans(subject);
+            if (enableEmojis) {
+                EmojiParser emojiParser = EmojiParser.getInstance();
+                smilizedSubject = emojiParser.addEmojiSpans(smilizedSubject);
+            }
             // Can't use the normal getString() with extra arguments for string replacement
             // because it doesn't preserve the SpannableText returned by addSmileySpans.
             // We have to manually replace the %s with our text.
@@ -523,7 +559,12 @@ public class MessageListItem extends LinearLayout implements
                 if (hasSubject) {
                     buf.append(" - ");
                 }
-                buf.append(parser.addSmileySpans(body));
+                CharSequence smileyBody = parser.addSmileySpans(body);
+                if (enableEmojis) {
+                    EmojiParser emojiParser = EmojiParser.getInstance();
+                    smileyBody = emojiParser.addEmojiSpans(smileyBody);
+                }
+                buf.append(smileyBody);
             }
         }
 
@@ -620,8 +661,13 @@ public class MessageListItem extends LinearLayout implements
                         }
                         final String telPrefix = "tel:";
                         if (url.startsWith(telPrefix)) {
-                            url = PhoneNumberUtils.formatNumber(
-                                            url.substring(telPrefix.length()), mDefaultCountryIso);
+                            if ((mDefaultCountryIso == null) || mDefaultCountryIso.isEmpty()) {
+                                url = url.substring(telPrefix.length());
+                            }
+                            else {
+                                url = PhoneNumberUtils.formatNumber(
+                                        url.substring(telPrefix.length()), mDefaultCountryIso);
+                            }
                         }
                         tv.setText(url);
                     } catch (android.content.pm.PackageManager.NameNotFoundException ex) {
@@ -805,62 +851,5 @@ public class MessageListItem extends LinearLayout implements
     public void seekVideo(int seekTo) {
         // TODO Auto-generated method stub
 
-    }
-
-    /**
-     * Override dispatchDraw so that we can put our own background and border in.
-     * This is all complexity to support a shared border from one item to the next.
-     */
-    @Override
-    public void dispatchDraw(Canvas c) {
-        super.dispatchDraw(c);
-
-        // This custom border is causing our scrolling fps to drop from 60+ to the mid 40's.
-        // Commenting out for now until we come up with a new UI design that doesn't require
-        // the border.
-        return;
-
-//        View v = mMessageBlock;
-//        if (v != null) {
-//            Path path = null;
-//            if (mAvatar.getPosition() == Divot.RIGHT_UPPER) {
-//                if (mPathRight == null) {
-//                    float r = v.getWidth() - 1;
-//                    float b = v.getHeight();
-//
-//                    mPathRight = new Path();
-//                    mPathRight.moveTo(0, mAvatar.getCloseOffset());
-//                    mPathRight.lineTo(0, 0);
-//                    mPathRight.lineTo(r, 0);
-//                    mPathRight.lineTo(r, b);
-//                    mPathRight.lineTo(0, b);
-//                    mPathRight.lineTo(0, mAvatar.getFarOffset());
-//                }
-//                path = mPathRight;
-//            } else if (mAvatar.getPosition() == Divot.LEFT_UPPER) {
-//                if (mPathLeft == null) {
-//                    float r = v.getWidth() - 1;
-//                    float b = v.getHeight();
-//
-//                    mPathLeft = new Path();
-//                    mPathLeft.moveTo(r, mAvatar.getCloseOffset());
-//                    mPathLeft.lineTo(r, 0);
-//                    mPathLeft.lineTo(0, 0);
-//                    mPathLeft.lineTo(0, b);
-//                    mPathLeft.lineTo(r, b);
-//                    mPathLeft.lineTo(r, mAvatar.getFarOffset());
-//                }
-//                path = mPathLeft;
-//            }
-//            if (mPaint == null) {
-//                mPaint = new Paint();
-//                mPaint.setColor(0xffcccccc);
-//                mPaint.setStrokeWidth(1F);
-//                mPaint.setStyle(Paint.Style.STROKE);
-//                mPaint.setColor(0xff00ff00);  // turn on for debugging, draws lines in green
-//            }
-//            c.translate(v.getX(), v.getY());
-//            c.drawPath(path, mPaint);
-//        }
     }
 }

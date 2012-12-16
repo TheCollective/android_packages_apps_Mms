@@ -56,6 +56,7 @@
     <string name="insufficient_drm_rights" msgid="6989074725969164383">"DRM権限が十分ではありません。"</string>
     <string name="copy_message_text" msgid="4296252229544252834">"テキストをコピー"</string>
     <string name="message_options" msgid="6838806653341967550">"メッセージオプション"</string>
+    <string name="slideshow_options" msgid="3501759384739796431">"スライドショーのオプション"</string>
     <string name="done" msgid="7479926268660505871">"完了"</string>
     <string name="move_up" msgid="7307578107431739359">"上に移動"</string>
     <string name="move_down" msgid="6356509518429479053">"下に移動"</string>
@@ -81,6 +82,7 @@
     <string name="remove" msgid="4625444913256213175">"削除"</string>
     <string name="send" msgid="4589898724889248486">"送信"</string>
     <string name="mms" msgid="1587631213714914559">"MMS"</string>
+    <string name="send_mms" msgid="2933162044872550662">"MMSを送信"</string>
     <string name="all_threads" msgid="2663426830306307194">"スレッド一覧"</string>
     <string name="type_to_compose_text_enter_to_send" msgid="3539985471008581265">"メッセージを入力"</string>
     <string name="open_keyboard_to_compose_message" msgid="7860109685511253191">"キーボードを表示してメッセージを入力"</string>
@@ -104,7 +106,6 @@
     <string name="cannot_send_message_reason" msgid="8745080126044054343">"メッセージに有効な宛先が指定されていません。"</string>
     <string name="cannot_forward_drm_obj" msgid="5047623751430559077">"メッセージ内のDRMオブジェクトは転送できません。"</string>
     <string name="converting_to_picture_message" msgid="2980023239017588627">"マルチメディアメッセージに変換中..."</string>
-    <string name="converting_to_text_message" msgid="6374423235426015422">"テキストメッセージに変換中..."</string>
     <string name="cannot_add_slide_anymore" msgid="4631404749618820994">"スライドを追加できません。"</string>
     <string name="cannot_add_picture_and_video" msgid="4954353772391381447">"1つのスライドに動画と画像を追加することはできません。"</string>
     <string name="cannot_save_message" msgid="3375907366965264446">"メッセージを保存できません。"</string>
@@ -161,8 +162,10 @@
     <string name="pref_summary_sms_delivery_reports" msgid="5852207702358546129">"送信するメッセージの受取確認を毎回要求する"</string>
     <string name="pref_summary_auto_delete" msgid="7719538116486177613">"上限に達したら古いメッセージを削除する"</string>
     <string name="pref_summary_delete_limit" msgid="597128041393045216">"スレッドごとに<xliff:g id="COUNT">%1$s</xliff:g>件のメッセージ"</string>
+    <string name="pref_summary_mms_group_mms" msgid="2266928687440696745">"宛先が複数ある場合にMMSを使用して1通のメッセージとして送信する"</string>
     <string name="pref_title_manage_sim_messages" msgid="7820895261757881177">"SIMカードのメッセージ"</string>
     <string name="pref_title_mms_delivery_reports" msgid="6666857926679451910">"受取確認通知"</string>
+    <string name="pref_title_mms_group_mms" msgid="1251698526583908432">"グループメッセージング"</string>
     <string name="pref_title_mms_read_reports" msgid="4882179829495828541">"開封確認レポート"</string>
     <string name="pref_title_sms_delivery_reports" msgid="876064208254451038">"受取確認通知"</string>
     <string name="pref_title_auto_delete" msgid="7227835692631701134">"古いメッセージを削除"</string>
@@ -286,6 +289,7 @@
     <string name="saved_ringtone" msgid="3847363932276708626">"着信音を保存しました。"</string>
     <string name="saved_ringtone_fail" msgid="4778500070919251116">"着信音を保存できませんでした。"</string>
     <string name="menu_insert_smiley" msgid="4964504393061025071">"絵文字を挿入"</string>
+    <string name="menu_group_participants" msgid="4288356090262299071">"参加者をグループ化"</string>
     <string name="select_link_title" msgid="3371818607625768447">"操作の選択"</string>
     <string name="slide_number" msgid="1923958526266726635">"スライド<xliff:g id="NUMBER">%s</xliff:g>"</string>
   <plurals name="slide_duration">
@@ -297,6 +301,7 @@
     <string name="storage_limits_activity" msgid="8810530813311077716">"ストレージ制限"</string>
     <string name="change_duration_activity" msgid="7048606979485031693">"表示時間を変更"</string>
     <string name="edit_slideshow_activity" msgid="8751493388760050529">"スライドショーを編集"</string>
+    <string name="recipient_list_activity" msgid="1254938236543727019">"参加者のグループ化"</string>
     <string name="edit_slide_activity" msgid="8752829671778696983">"スライドを編集"</string>
     <string name="slideshow_activity" msgid="5658249461317434432">"スライドショー"</string>
     <string name="class_0_message_activity" msgid="6631339964159861048">"クラス0メッセージ"</string>
@@ -343,4 +348,49 @@
     <string name="attachment_picture" msgid="3709286281567284296">"画像"</string>
     <string name="notification_separator" msgid="2334673105226536422">"  "</string>
     <string name="enumeration_comma" msgid="213598026698964628">"、 "</string>
+    <string name="message_timestamp_format" msgid="4188999027493614617">"<xliff:g id="STRING_0">%1$s</xliff:g> - <xliff:g id="STRING_1">%2$s</xliff:g>"</string>
+
+   <!-- Cyanogenmod Extra entries -->
+    <string name="pref_title_sms_split_counter">分割カウンタ</string>
+    <string name="pref_summary_sms_split_counter">メッセージに分割数のカウンタを追加する。例: (1/2)</string>
+    <string name="menu_insert_emoji">絵文字を挿入</string>
+    <string name="prefs_templates_settings">SMSテンプレート</string>
+    <string name="pref_title_templates_manage">テンプレート</string>
+    <string name="pref_summary_templates_manage">SMSテンプレートの管理</string>
+    <string name="pref_title_templates_show_gesture">ジェスチャー</string>
+    <string name="pref_summary_templates_show_gesture">ジェスチャーの軌跡を表示</string>
+    <string name="pref_title_template_gestures_sensitivity">ジェスチャーの感度</string>
+    <string name="template_save">保存</string>
+    <string name="template_insert_hint">テンプレートテキストを挿入</string>
+    <string name="template_empty_text">テキストフィールドは空にできません</string>
+    <string name="template_explanation">テンプレートテキストを挿入あるいは編集し、必要であればジェスチャーを描いて定義します</string>
+    <string name="template_edit">編集</string>
+    <string name="template_delete">削除</string>
+    <string name="template_ctx_menu_title">アクション</string>
+    <string name="template_list_title">テンプレート</string>
+    <string name="template_new_title">新規テンプレート</string>
+    <string name="template_insert">テンプレートを挿入</string>
+    <string name="template_gesture_draw">下のスペースにジェスチャーを描いてください</string>
+    <string name="template_not_present_error">テンプレートは定義されてません</string>
+    <string name="template_not_present_error_title">エラー</string>
+    <string name="template_select">テンプレートを選択</string>
+    <string name="template_cancel_confirm_title">警告</string>
+    <string name="template_cancel_confirm_text">テンプレートは削除されます. 続けますか?</string>
+    <string name="gestures_already_present">警告: 他のテンプレートに似たようなジェスチャーが設定されています!</string>
+    <string name="pref_extra_settings">拡張設定</string>
+    <string name="pref_title_strip_unicode">ユニコードを取り除く</string>
+    <string name="pref_summary_strip_unicode">160文字のSMSメッセージでサポートされない一般的な文字を置き換える</string>
+    <string name="pref_title_enable_emojis">絵文字サポート</string>
+    <string name="pref_summary_enable_emojis">ユニコード絵文字サポートを有効にする, 471個のステキな絵文字</string>
+    <string name="pref_title_mms_full_timestamp">完全なタイムスタンプ</string>
+    <string name="pref_summary_mms_full_timestamp">タイムスタンプに日付と時刻の両方を表示する</string>
+    <string name="pref_title_mms_use_sent_timestamp">送信時刻表示</string>
+    <string name="pref_summary_mms_use_sent_timestamp">着信時刻の代わりに送信時刻を表示する</string>
+    <string name="pref_title_mms_notification_vibrate_settings">振動の設定</string>
+    <string name="pref_title_mms_notification_vibrate_pattern">振動パターン</string>
+    <string name="pref_summary_mms_notification_vibrate_pattern">振動パターンを変更する</string>
+    <string name="pref_title_mms_notification_vibrate_call">着信時に振動</string>
+    <string name="pref_summary_mms_notification_vibrate_call">着信中に振動を許可する</string>
+    <string name="pref_title_mms_notification_vibrate_custom">カスタム振動パターン</string>
+    <string name="pref_text_mms_notification_vibrate_custom">オフ/オンをミリ秒で記述: オフ, オン, オフ, オン, ...</string>
 </resources>

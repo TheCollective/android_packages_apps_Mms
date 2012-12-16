@@ -142,6 +142,7 @@
                     android:hint="@string/type_to_compose_text_enter_to_send"
                     android:minHeight="@dimen/input_text_height"
                     android:maxLines="3"
+                    android:inputType="textShortMessage|textAutoCorrect|textCapSentences|textMultiLine"
                     android:imeOptions="actionSend|flagNoEnterAction"
                     android:maxLength="2000"
                 />
@@ -158,7 +159,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_horizontal|bottom"
-                        android:textColor="@color/compose_message_edit_text"
+                        android:textColor="@color/compose_message_text_counter"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         android:paddingLeft="3dip"
@@ -180,7 +181,7 @@
                         android:layout_marginLeft="4dip"
                         android:editable="false"
                         android:text="@string/mms"
-                        android:contentDescription="@string/send"
+                        android:contentDescription="@string/send_mms"
                         android:nextFocusLeft="@+id/embedded_text_editor" />
 
                     <ImageButton

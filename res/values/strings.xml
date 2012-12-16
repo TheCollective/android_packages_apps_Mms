@@ -3,7 +3,6 @@
 /*
  * Copyright (C) 2007-2008 Esmertec AG.
  * Copyright (C) 2007-2008 The Android Open Source Project
- * QuickMessage: Copyright (C) 2012 The CyanogenMod Project (DvTonder)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +19,11 @@
 -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-
     <!-- The name of the SMS/MMS app as it appears to the user in the Home screen, task switcher, etc. -->
     <string name="app_label">Messaging</string>
 
-    <!-- Command name to open a Compose screen; displays in conversation list -->
+    <!-- Command name to open a Compose screen; displays in conversation list.
+         Also used as accessibility text for widget's new message button -->
     <string name="new_message">New message</string>
     <!-- Context menu item on an individual message for dialing the sender's phone number -->
     <string name="menu_call_back">Call <xliff:g id="name">%s</xliff:g></string>
@@ -35,11 +34,9 @@
     <string name="menu_compose_new">Compose</string>
     <!-- Menu item for accessing application settings -->
     <string name="menu_preferences">Settings</string>
-    <!--
-         Menu shown in the context menu when long pressing on a message when the message contains
+    <!-- Menu shown in the context menu when long pressing on a message when the message contains
          one or more phone numbers and/or email addresses and the number or email is new to
-         contacts. [CHAR LIMIT=50]
-    -->
+         contacts. [CHAR LIMIT=50] -->
     <string name="menu_add_address_to_contacts">Add <xliff:g id="contactEmailOrNumber">%s</xliff:g> to People</string>
     <!-- Menu item to call the recipient of the conversation on the phone (imperative verb) -->
     <string name="menu_call">Call</string>
@@ -52,7 +49,7 @@
     <!-- Context menu item on an individual conversation for viewing that conversation -->
     <string name="menu_view">View thread</string>
     <!-- Menu item for debugging - do not localize -->
-    <string name="menu_debug_dump" translatable="false">DEBUG DUMP</string>
+    <string name="menu_debug_dump">DEBUG DUMP</string>
     <!-- Message that appears on screen while SIM card messages are retrieved -->
     <string name="refreshing">Refreshing\u2026</string>
 
@@ -90,15 +87,11 @@
     <string name="delete_thread">Delete thread</string>
     <!-- Context menu item on an individual message for forwarding it to another recipient -->
     <string name="menu_forward">Forward</string>
-    <!--
-         Text of a button appearing for MMS messages that have not yet been downloaded, causing the message
-         to be downloaded (imperative verb)
-    -->
+    <!-- Text of a button appearing for MMS messages that have not yet been downloaded, causing the message
+         to be downloaded (imperative verb) -->
     <string name="download">Download</string>
-    <!--
-         Message displayed in place of the "download message" button once it has been pressed,
-         indicating that the download is in progress
-    -->
+    <!-- Message displayed in place of the "download message" button once it has been pressed,
+         indicating that the download is in progress -->
     <string name="downloading">Downloading</string>
     <!-- Formatting for subject displayed inline, prepended to MMS message text -->
     <string name="inline_subject">"&lt;Subject: <xliff:g id="subject">%s</xliff:g>&gt;"</string>
@@ -110,6 +103,8 @@
     <string name="copy_message_text">Copy text</string>
     <!-- Header for context menu on an individual message -->
     <string name="message_options">Message options</string>
+    <!-- Header for context menu on an individual slideshow -->
+    <string name="slideshow_options">Slideshow options</string>
 
     <!-- Button text on edit slide screen indicating the user wants to finish editing that slide -->
     <string name="done">Done</string>
@@ -128,6 +123,7 @@
     <string name="discard_slideshow">Discard slideshow</string>
     <!-- Header of slideshow showing which slide is being displayed -->
     <string name="slide_show_part">Part <xliff:g id="part">%1$s</xliff:g>/<xliff:g id="total">%2$s</xliff:g></string>
+
 
     <!-- Menu item in slide edit screen for removing the text from the slide being edited -->
     <string name="remove_text">Remove text</string>
@@ -167,6 +163,8 @@
     <string name="send">Send</string>
     <!-- Text to appear directly below the "Send" text on the SMS/MMS send button. The "MMS" text is on a second line in a smaller font. This is similar to saying "Send (mms)". -->
     <string name="mms">MMS</string>
+    <!-- Content description for the send button when sending an mms (imperative verb) -->
+    <string name="send_mms">Send MMS</string>
 
     <!-- Menu item in conversation screen for returning to the conversation list -->
     <string name="all_threads">All threads</string>
@@ -201,10 +199,8 @@
     <string name="has_invalid_recipient">Invalid recipient(s): &lt;<xliff:g id="name">%1$s</xliff:g>&gt;</string>
     <!-- While sending a message, if it has invalid recipient, display this message. -->
     <string name="invalid_destination">Invalid destination address.</string>
-    <!--
-         While sending a message, this error is expected to be generated when user does not have
-         MMS enabled on his account. [CHAR LIMIT=NONE]
-    -->
+    <!-- While sending a message, this error is expected to be generated when user does not have
+         MMS enabled on his account. [CHAR LIMIT=NONE] -->
     <string name="service_not_activated">Service not activated on network.</string>
     <!-- If a message has expired and is no longer available on MMSC, show this toast. [CHAR LIMIT=NONE] -->
     <string name="service_message_not_found">Message expired or not available.</string>
@@ -221,8 +217,6 @@
 
     <!-- Brief message that appears when converting a message from SMS to MMS. -->
     <string name="converting_to_picture_message">Converting to multimedia message\u2026</string>
-    <!-- Brief message that appears when converting a message from MMS to SMS. -->
-    <string name="converting_to_text_message">Converting to text message\u2026</string>
     <!-- Brief message that appears when the maximum number of slides has been reached -->
     <string name="cannot_add_slide_anymore">Can\'t add more slides.</string>
     <!-- Brief message that appears when user tries to add picture to a slide which already has a video. -->
@@ -272,25 +266,23 @@
     <string name="secs">secs</string>
     <!-- Options for slide duration in duration selection dialog box -->
     <string-array name="select_dialog_items">
-        <item>1 second</item>
-        <item>2 seconds</item>
-        <item>3 seconds</item>
-        <item>4 seconds</item>
-        <item>5 seconds</item>
-        <item>6 seconds</item>
-        <item>7 seconds</item>
-        <item>8 seconds</item>
-        <item>9 seconds</item>
-        <item>10 seconds</item>
-        <item>Other</item>
+         <item>1 second</item>
+         <item>2 seconds</item>
+         <item>3 seconds</item>
+         <item>4 seconds</item>
+         <item>5 seconds</item>
+         <item>6 seconds</item>
+         <item>7 seconds</item>
+         <item>8 seconds</item>
+         <item>9 seconds</item>
+         <item>10 seconds</item>
+         <item>Other</item>
     </string-array>
 
     <!-- Context menu item on a message recipient for viewing their contact info -->
     <string name="menu_view_contact">View contact</string>
-    <!--
-         Context menu item on a message recipient for adding them to the user's
-         contacts (used if the recipient is not already in the address book)
-    -->
+    <!-- Context menu item on a message recipient for adding them to the user's
+         contacts (used if the recipient is not already in the address book) -->
     <string name="menu_add_to_contacts">Add to People</string>
 
     <!-- Sender to be used if the sender address has been hidden -->
@@ -307,10 +299,8 @@
     <string name="play">Play</string>
     <!-- Button text used for editing a slideshow (imperative verb) -->
     <string name="edit">Edit</string>
-    <!--
-         Button used for trying to send a message that has some valid recipients and some
-         invalid recipients, in spite of the warning presented to the user
-    -->
+    <!-- Button used for trying to send a message that has some valid recipients and some
+         invalid recipients, in spite of the warning presented to the user -->
     <string name="try_to_send">Try to send</string>
 
     <!-- Title of Settings screen -->
@@ -326,8 +316,7 @@
     <string name="pref_sms_settings_title">"Text (SMS) messages"</string>
     <!-- Settings screen, section heading for storage-specific settings -->
     <string name="pref_sms_storage_title">Storage</string>
-    <!-- Settings screen, section heading for display-specific settings -->
-    <string name="pref_display_title">Display</string>
+
     <!-- Settings item description for entering SIM card message screen -->
     <string name="pref_summary_manage_sim_messages">Manage messages stored on your SIM card</string>
     <!-- Settings item description for boolean MMS delivery report setting -->
@@ -340,10 +329,14 @@
     <string name="pref_summary_auto_delete">Delete old messages as limits are reached</string>
     <!-- Settings item description for integer auto-delete sms message limit -->
     <string name="pref_summary_delete_limit"><xliff:g id="count">%1$s</xliff:g> messages per conversation</string>
+    <!-- Settings item description for boolean MMS enable group MMS setting -->
+    <string name="pref_summary_mms_group_mms">Use MMS to send a single message when there are multiple recipients</string>
     <!-- Settings item for entering SIM card message screen -->
     <string name="pref_title_manage_sim_messages">Manage SIM card messages</string>
     <!-- Settings item for boolean option to enable/disable MMS delivery reports -->
     <string name="pref_title_mms_delivery_reports">Delivery reports</string>
+    <!-- Settings item for boolean option to enable/disable MMS group messages -->
+    <string name="pref_title_mms_group_mms">Group messaging</string>
     <!-- Settings item for boolean option to enable/disable MMS read reports -->
     <string name="pref_title_mms_read_reports">Read reports</string>
     <!-- Settings item for boolean option to enable/disable SMS delivery reports -->
@@ -366,17 +359,9 @@
     <string name="pref_title_notification_ringtone">Choose ringtone</string>
     <!-- Settings item for setting the number of message to save for each conversation -->
     <string name="pref_messages_to_save">Set number of messages to save</string>
-    <!-- Settings item for the soft keyboard picker -->
-    <string name="pref_title_input_type">Soft keyboard type</string>
-    <string name="pref_summary_input_type">Select the soft keyboard to use when composing messages</string>
-    <!-- Settings item for boolean option to show the full datetime -->
-    <string name="pref_title_fulldate">Show full date</string>
-    <!-- Settings item description for boolean full datetime setting -->
-    <string name="pref_summary_fulldate">Show the full date for messages</string>
 
     <!-- The vibrate notification modes -->
     <string-array name="prefEntries_vibrateWhen">
-
         <!-- Always -->
         <item>Always</item>
         <!-- Only when the phone is in Silent mode -->
@@ -386,14 +371,14 @@
     </string-array>
 
     <!-- The default vibrateWhen value, when none is set -->
-    <string name="prefDefault_vibrateWhen" translatable="false">never</string>
+    <string translatable="false" name="prefDefault_vibrateWhen">never</string>
     <!-- The value to use when migrating from old versions for a true vibrate setting -->
-    <string name="prefDefault_vibrate_true" translatable="false">always</string>
+    <string translatable="false" name="prefDefault_vibrate_true">always</string>
     <!-- The value to use when migrating from old versions for a false vibrate setting -->
-    <string name="prefDefault_vibrate_false" translatable="false">never</string>
+    <string translatable="false" name="prefDefault_vibrate_false">never</string>
 
     <!-- The vibrateWhen values -->
-    <string-array name="prefValues_vibrateWhen" translatable="false">
+    <string-array translatable="false" name="prefValues_vibrateWhen">
         <item>always</item>
         <item>silent</item>
         <item>never</item>
@@ -416,18 +401,14 @@
     <string name="confirm_dialog_title">Delete?</string>
     <!-- Delete confirmation dialog title for locked messages -->
     <string name="confirm_dialog_locked_title">Delete locked message?</string>
-    <!--
-         This message is displayed in a confirmation dialog when the user selects one or more
-         conversations and then taps the "Delete" button.
-    -->
+    <!-- This message is displayed in a confirmation dialog when the user selects one or more
+         conversations and then taps the "Delete" button. -->
     <plurals name="confirm_delete_conversation">
-
         <!-- Case of 1 result. -->
         <item quantity="one">One conversation will be deleted.</item>
         <!-- Case of 0 or 2 or more results. -->
         <item quantity="other"><xliff:g id="number" example="15">%1$s</xliff:g> conversations will be deleted.</item>
     </plurals>
-
     <string name="confirm_delete_conversation">The entire thread will be deleted.</string>
     <!-- Delete all threads confirmation dialog message -->
     <string name="confirm_delete_all_conversations">All threads will be deleted.</string>
@@ -450,10 +431,8 @@
     <!-- Show this in the middle of the main activity when loading conversations [CHAR LIMIT=none] -->
     <string name="loading_conversations">Loading conversations.</string>
 
-    <!--
-         When the user tries to view message details and some error occurs while
-         retrieving those details, this message will be shown.
-    -->
+    <!-- When the user tries to view message details and some error occurs while
+         retrieving those details, this message will be shown. -->
     <string name="cannot_get_details">Can\'t get details.</string>
     <!-- Title of "Message details" dialog -->
     <string name="message_details_title">Message details</string>
@@ -494,17 +473,15 @@
     <!-- Label in "Message details" dialog -->
     <string name="error_code_label">Error code:\u0020</string>
 
-    <!-- Menu title for editing a message -->
-    <string name="menu_edit">Edit</string>
-    <!--
-        Menu title for deleting undelivered messages or messages on
-        the SIM card.
-    -->
-    <string name="menu_delete_messages">Delete messages</string>
-    <!-- Menu title for locking a message -->
-    <string name="menu_lock">Lock</string>
-    <!-- Menu title for unlocking a message -->
-    <string name="menu_unlock">Unlock</string>
+   <!-- Menu title for editing a message -->
+   <string name="menu_edit">Edit</string>
+   <!-- Menu title for deleting undelivered messages or messages on
+        the SIM card. -->
+   <string name="menu_delete_messages">Delete messages</string>
+   <!-- Menu title for locking a message -->
+   <string name="menu_lock">Lock</string>
+   <!-- Menu title for unlocking a message -->
+   <string name="menu_unlock">Unlock</string>
 
     <!-- Manage SIM Messages -->
     <!-- Menu title to copy a selected message from the SIM card to the phone. -->
@@ -543,8 +520,9 @@
     <string name="recipient_label">Recipient:\u0020</string>
     <!-- Label in "Report" window -->
     <string name="status_label">Status:\u0020</string>
-    <!-- Label in "Report" window [CHAR LIMIT=50] -->
+    <!-- Label in "Report" window [CHAR LIMIT=50]-->
     <string name="delivered_label">Delivered:\u0020</string>
+
 
     <!-- Attachment Type Selector Adapter. This string is an option in the "Attach" dialog, "Add music" dialog -->
     <string name="attach_image">Pictures</string>
@@ -594,20 +572,14 @@
     <!-- Sms's Being Rejected Notification dialog text. -->
     <string name="sms_rejected_body">An incoming message was rejected due to an unknown reason.</string>
 
-    <!--
-         Multimedia type used in building other messages.
-         For instance: Sorry, you cannot add this audio to your message.
-    -->
+    <!-- Multimedia type used in building other messages.
+         For instance: Sorry, you cannot add this audio to your message. -->
     <string name="type_audio">audio</string>
-    <!--
-         Multimedia type used in building other messages.
-         For instance: Sorry, you cannot add this picture to your message.
-    -->
+    <!-- Multimedia type used in building other messages.
+         For instance: Sorry, you cannot add this picture to your message. -->
     <string name="type_picture">picture</string>
-    <!--
-         Multimedia type used in building other messages.
-         For instance: Sorry, you cannot add this video to your message.
-    -->
+    <!-- Multimedia type used in building other messages.
+         For instance: Sorry, you cannot add this video to your message. -->
     <string name="type_video">video</string>
 
     <!-- Dialog title for the Read Report dialog. -->
@@ -615,30 +587,22 @@
     <!-- Dialog text for the Read Report dialog. -->
     <string name="message_send_read_report">A read report will be sent.</string>
 
-    <!--
-         This is the text of a toast message briefly displayed when a problem occurs
-         while sending.
-    -->
+    <!-- This is the text of a toast message briefly displayed when a problem occurs
+         while sending. -->
     <string name="message_queued">Currently can\'t send your message. It will be sent when the service becomes available.</string>
 
     <!-- dialog error message when only is FDN is allowed. -->
     <string name="fdn_check_failure">You can only send messages to your fixed dialing numbers.</string>
 
     <!-- Download Manager -->
-    <!--
-         When an error occurs downloading a new message and a subject isn't available, substitute
-         this default subject.
-    -->
+    <!-- When an error occurs downloading a new message and a subject isn't available, substitute
+         this default subject. -->
     <string name="no_subject">(No subject)</string>
-    <!--
-         When an error occurs downloading a new message and the sender is unknown, substitute
-         this default text.
-    -->
+    <!-- When an error occurs downloading a new message and the sender is unknown, substitute
+         this default text. -->
     <string name="unknown_sender">Unknown sender</string>
-    <!--
-         When an error occurs downloading a new message, display this message.
-         An example: Download of message Wanna get pizza from dorkman was unsuccessful.
-    -->
+    <!-- When an error occurs downloading a new message, display this message.
+         An example: Download of message Wanna get pizza from dorkman was unsuccessful. -->
     <string name="dl_failure_notification">Couldn\'t download message <xliff:g id="subject">%1$s</xliff:g> from <xliff:g id="from">%2$s</xliff:g>.</string>
 
     <!-- This is the confirm rate limit alert dialog title. -->
@@ -664,33 +628,26 @@
     <string name="copy_to_sdcard_success">Attachment saved.</string>
     <!-- Toast message on failed copy to shared storage [CHAR LIMIT=30] -->
     <string name="copy_to_sdcard_fail">Couldn\'t save attachment.</string>
-    <!-- File name used to copy an attachment to the shared storage
-    if the received location is not a valid file name -->
-    <string translatable="false" name="copy_to_sdcard_filename_fallback">mms</string>
     <!-- Menu title to save a sound as a ringtone -->
     <string name="save_ringtone">Save as ringtone</string>
     <!-- Toast message on successful copying ringtone to drm provider -->
     <string name="saved_ringtone">Ringtone saved.</string>
     <!-- Toast message on failed copying ringtone to drm provider -->
     <string name="saved_ringtone_fail">Couldn\'t save ringtone.</string>
-    <!-- File name used to save a sound as a ringtone
-    if the received location is not a valid file name -->
-    <string translatable="false" name="save_ringtone_filename_fallback">mms_ringtone</string>
     <!-- Menu item -->
     <string name="menu_insert_smiley">Insert smiley</string>
+    <!-- Menu item  [CHAR LIMIT=40] -->
+    <string name="menu_group_participants">Group participants</string>
 
-    <!--
-    This is the dialog title for the "Select link" dialog, shown when the user clicks on a
+    <!-- This is the dialog title for the "Select link" dialog, shown when the user clicks on a
     chat in the chat history view if there are links in the chat message. The dialog displays the
-    links if there are any
-    -->
+    links if there are any -->
     <string name="select_link_title">Choose action</string>
 
     <!-- Name of the Nth slide, shown in the list in the slideshow editor. -->
     <string name="slide_number">Slide <xliff:g id="number" example="5">%s</xliff:g></string>
     <!-- Duration of the slide, shown in the list in the slideshow editor -->
     <plurals name="slide_duration">
-
         <!-- Case of 1-second duration. -->
         <item quantity="one"><xliff:g id="number" example="1">%s</xliff:g> sec</item>
         <!-- Case of "few" (small number of) seconds of duration. -->
@@ -710,6 +667,9 @@
 
     <!-- Title of the slideshow editor activity. -->
     <string name="edit_slideshow_activity">Edit slideshow</string>
+
+    <!-- Title of the recipient list activity. [CHAR LIMIT=NONE] -->
+    <string name="recipient_list_activity">Group participants</string>
 
     <!-- Title of the slide editor activity. -->
     <string name="edit_slide_activity">Edit slide</string>
@@ -731,31 +691,28 @@
     <!-- Search setting description -->
     <string name="search_setting_description">Text in your messages</string>
 
-    <!-- Search empty results -->
+    <!--  Search empty results -->
     <string name="search_empty">No matches.</string>
 
-    <!-- Search results title -->
+    <!--  Search results title -->
     <plurals name="search_results_title">
-
         <!-- Case of 1 result. -->
         <item quantity="one"><xliff:g id="number" example="1">%1$s</xliff:g> result for \"<xliff:g id="search" example="???">%2$s</xliff:g>\"</item>
         <!-- Case of 0 or 2 or more results. -->
         <item quantity="other"><xliff:g id="number" example="15">%1$s</xliff:g> results for \"<xliff:g id="search" example="???">%2$s</xliff:g>\"</item>
     </plurals>
 
-    <!-- - String saved in history searches. -->
+    <!--- String saved in history searches. -->
     <string name="search_history"><xliff:g id="count">%1$s</xliff:g> results for \"<xliff:g id="search">%2$s</xliff:g>\"</string>
 
     <!-- Button title in Messaging preferences. -->
     <string name="confirm_clear_search_title">Clear</string>
     <!-- Text for the preferences button. -->
     <string name="confirm_clear_search_text">Search history will be cleared.</string>
-    <!--
-        - Button title in preferences to clear the search history. It's a verb action that takes place
-          immediately when clicked.
-    -->
+    <!--- Button title in preferences to clear the search history. It's a verb action that takes place
+          immediately when clicked. -->
     <string name="pref_mms_clear_search_history_title">Clear search history</string>
-    <!-- - Button description in preferences to clear the search history. -->
+    <!--- Button description in preferences to clear the search history. -->
     <string name="pref_mms_clear_search_history_summary">Clear previous Messaging searches from showing up in the Search box</string>
 
     <!-- Dialog text for display mode save dialog. -->
@@ -773,10 +730,8 @@
     <!-- Button title to dismiss dialog that informs user about new storage settings. -->
     <string name="storage_limits_setting_dismiss">No limits</string>
 
-    <!--
-         Toast message when a user tries to send a Mms message when there are already too many
-         outstanding unsent message.
-    -->
+    <!-- Toast message when a user tries to send a Mms message when there are already too many
+         outstanding unsent message. -->
     <string name="too_many_unsent_mms">Can\'t send message right now. Too many unsent multimedia messages.</string>
 
     <!-- Brief small label shown to right of message when it is being sent. -->
@@ -788,49 +743,35 @@
     <!-- Message of progress dialog for picker -->
     <string name="adding_recipients">Adding recipients\u2026</string>
 
-    <!--
-         In conversation list items, this is the separator between a contact's name
-         and the draft stamp [CHAR LIMIT=5]
-    -->
+    <!-- In conversation list items, this is the separator between a contact's name
+         and the draft stamp [CHAR LIMIT=5] -->
     <string name="draft_separator">,\u0020</string>
 
-    <!--
-         In conversation list items, this comes after the receipient's name and contains
-         the number of messages in the thread [CHAR LIMIT=5]
-    -->
+    <!-- In conversation list items, this comes after the receipient's name and contains
+         the number of messages in the thread [CHAR LIMIT=5] -->
     <string name="message_count_format">\u00a0<xliff:g id="number" example="1">%1$s</xliff:g></string>
 
     <!-- When showing a multi-message notification, this is the title [CHAR LIMIT=none] -->
     <string name="message_count_notification"><xliff:g id="number" example="3">%1$s</xliff:g> new messages</string>
-    <!--
-         In digest notifications when we show N messages, but there are N+M outstanding messages,
-         this text is displayed at the bottom of the notification. [CHAR LIMIT=50]
-    -->
+    <!-- In digest notifications when we show N messages, but there are N+M outstanding messages,
+         this text is displayed at the bottom of the notification. [CHAR LIMIT=50] -->
     <plurals name="message_count_notification_overflow">
-
         <!-- Case of 1 result. -->
         <item quantity="one">+<xliff:g id="number" example="1">%1$s</xliff:g> other message"</item>
         <!-- Case of 2 or more results. -->
         <item quantity="other">+<xliff:g id="number" example="15">%1$s</xliff:g> other messages"</item>
     </plurals>
 
-    <!--
-         For debugging: Dialog box title indicating there's a situation where data has unexpectedly
-         changed
-    -->
+    <!-- For debugging: Dialog box title indicating there's a situation where data has unexpectedly
+         changed -->
     <string name="error_state">Inconsistent state</string>
-    <!--
-         For debugging: Dialog box text indicating there's a situation where data has unexpectedly
-         changed
-    -->
+    <!-- For debugging: Dialog box text indicating there's a situation where data has unexpectedly
+         changed -->
     <string name="error_state_text">The state of threads and recipients is inconsistent. Please capture a bug report and report it via http://go/droidanizer </string>
-    <string name="label_mms_push">MMS Push</string>
-    <string name="desc_mms_push">Pushes MMS from outbox to the network</string>
 
     <!-- In the title of the compose message activity, when there are multiple recipients, we show
          the number of recipients in the subtitle of the action bar. There's never a case of one. [CHAR LIMIT=50] -->
     <plurals name="recipient_count">
-
         <!-- Case of 0 or 2 or more results. -->
         <item quantity="other"><xliff:g id="number" example="15">%1$s</xliff:g> people</item>
     </plurals>
@@ -856,15 +797,34 @@
     <!-- An enumeration comma for separating multiple names in notifications. [CHAR LIMIT=2] -->
     <string name="enumeration_comma">,\u0020</string>
 
+    <!-- In message list items, this string builds the timestamp line when the message is in a group [CHAR LIMIT=NONE] -->
+    <string name="message_timestamp_format"><xliff:g id="string" example="Fred Flinstone">%1$s</xliff:g>\u0020-\u0020<xliff:g id="string" example="9:39AM">%2$s</xliff:g></string>
+
+    <!-- CYANOGENMOD EDITS START -->
+
+    <!-- Extra Settings: -->
+    <string name="pref_extra_settings">Extra settings</string>
+
+    <!-- Strip unicode -->
+    <string name="pref_title_strip_unicode">Strip unicode</string>
+    <string name="pref_summary_strip_unicode">Substitute common characters that are not supported in 160 character SMS messages</string>
+
+    <!-- Enable emojis -->
+    <string name="pref_title_enable_emojis">Emoji support</string>
+    <string name="pref_summary_enable_emojis">Enable support for unicode emojis, a set of 471 nice emoticons</string>
+
+    <!-- Emoji Menu item -->
+    <string name="menu_insert_emoji">Insert emojis</string>
+
     <!-- Settings item for boolean option for SMS Split Counter -->
     <string name="pref_title_sms_split_counter">Split counter</string>
     <!-- Settings item description for boolean SMS Split 160 characters setting -->
     <string name="pref_summary_sms_split_counter">Adds counter to message ex. (1/2)</string>
 
     <!-- Sms templates -->
-    <string name="prefs_templates_settings">Sms templates</string>
+    <string name="prefs_templates_settings">SMS templates</string>
     <string name="pref_title_templates_manage">Templates</string>
-    <string name="pref_summary_templates_manage">Manage your sms templates</string>
+    <string name="pref_summary_templates_manage">Manage your SMS templates</string>
     <string name="pref_title_templates_show_gesture">Gesture</string>
     <string name="pref_summary_templates_show_gesture">Show gesture trace</string>
     <string name="pref_title_template_gestures_sensitivity">Gesture sensitivity</string>
@@ -879,7 +839,7 @@
     <string name="template_new_title">New template</string>
     <string name="template_insert">Insert template</string>
     <string name="template_gesture_draw">Draw the gesture in the space below</string>
-    <string name="template_not_present_error">You have not defined any template</string>
+    <string name="template_not_present_error">There are no defined templates</string>
     <string name="template_not_present_error_title">Error</string>
     <string name="template_select">Select a template</string>
     <string name="template_cancel_confirm_title">Warning</string>
@@ -895,25 +855,31 @@
     <string name="pref_title_mms_notification_vibrate_custom">Custom vibrate pattern</string>
     <string name="pref_text_mms_notification_vibrate_custom">Format off/on in milliseconds: off, on, off, on, ...</string>
 
-    <!-- Extra Settings: -->
-    <string name="pref_extra_settings">Extra settings</string>
-
     <!-- Full timestamps -->
     <string name="pref_title_mms_full_timestamp">Full timestamps</string>
     <string name="pref_summary_mms_full_timestamp">Display both date and time in timestamps</string>
+
     <!-- Which timestamps -->
     <string name="pref_title_mms_use_sent_timestamp">Original timestamps</string>
     <string name="pref_summary_mms_use_sent_timestamp">Display sent date instead of received date in timestamps</string>
 
+    <!-- Add menu for 'Add SMS to calendar remind' -->
+    <string name="menu_add_to_calendar">Add to calendar</string>
+
     <!-- Soft Keyboard Type -->
-    <string name="pref_keyboard_send">Enter to Send</string>
-    <string name="pref_keyboard_new_line">Enter for a new line</string>
+    <string name="pref_keyboard_emoji">Show the Emoticons key</string>
+    <string name="pref_keyboard_new_line">Show the Enter key</string>
+    <string name="pref_keyboard_unknown">Unknown, please reselect</string>
+
+    <!-- Settings item for the soft keyboard picker -->
+    <string name="pref_title_input_type">Soft keyboard type</string>
+    <string name="pref_summary_input_type">Select the soft keyboard to use when composing messages</string>
 
     <!-- QUICKMESSAGE SUPPORT -->
     <!-- Preferences -->
-    <string name="pref_quickmessage">QuickMessage</string>
-    <string name="pref_quickmessage_title">Enable QuickMessage</string>
-    <string name="pref_quickmessage_summary">Display the QuickMessage pop-up dialog</string>
+    <string name="pref_quickmessage">Quick reply</string>
+    <string name="pref_quickmessage_title">Show pop-up</string>
+    <string name="pref_quickmessage_summary">Display the QuickMessage pop-up for incoming SMS messages</string>
     <string name="pref_wake_unlock_title">Wake and unlock</string>
     <string name="pref_wake_unlock_summary">Wake and unlock device on incoming message (insecure lock screens only)</string>
     <string name="pref_close_all_title">Close all</string>
@@ -933,19 +899,10 @@
     <!-- QM Toast -->
     <string name="toast_sending_message">Sending message</string>
 
-     <!-- Quick Reply -->
-    <string name="quick_call_back">Call Back</string>
-    <string name="quick_reply_sms">Quick Reply</string>
-    <string name="quick_reply_sending">Quick reply sent to</string>
-    <string name="qr_alert_title">Nothing Has Been Sent</string>
-    <string name="qr_alert_message">Did you want to cancel this message?</string>
-    <string name="qr_alert_yes">Yes</string>
-    <string name="qr_alert_no">No</string>
-    <string name="qr_alert_read">Mark Read</string>
-    <string name="qr_mark_read">Mark Read &amp; Close</string>
-    <string name="qr_pick_smiley">Insert Smiley</string>
-    <string name="qr_close_popup">Close</string>
-    <string name="qr_multi_ask">Who do you want to reply to?</string>
+    <!-- QM - Quick reply -->
+    <string name="qm_quick_reply">Reply</string>
+    <string name="qm_mark_read">Read</string>
 
+    <!-- CYANOGENMOD EDITS END -->
 
 </resources>

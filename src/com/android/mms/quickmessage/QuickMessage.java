@@ -18,6 +18,7 @@ package com.android.mms.quickmessage;
 
 import android.content.Intent;
 import android.widget.EditText;
+
 import com.android.mms.transaction.MessagingNotification.NotificationInfo;
 
 public class QuickMessage {
@@ -49,10 +50,8 @@ public class QuickMessage {
         return mFromName;
     }
 
-
     public String[] getFromNumber() {
         return mFromNumber;
-
     }
 
     public String getMessageBody() {
@@ -84,5 +83,4 @@ public class QuickMessage {
     public long getThreadId() {
         return mContent.mThreadId;
     }
-
 }

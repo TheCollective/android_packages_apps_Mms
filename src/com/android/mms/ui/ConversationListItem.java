@@ -17,18 +17,12 @@
 
 package com.android.mms.ui;
 
-import com.android.mms.LogTag;
-import com.android.mms.R;
-import com.android.mms.data.Contact;
-import com.android.mms.data.ContactList;
-import com.android.mms.data.Conversation;
-import com.android.mms.util.SmileyParser;
-
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
@@ -41,6 +35,14 @@ import android.widget.Checkable;
 import android.widget.QuickContactBadge;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.android.mms.LogTag;
+import com.android.mms.R;
+import com.android.mms.data.Contact;
+import com.android.mms.data.ContactList;
+import com.android.mms.data.Conversation;
+import com.android.mms.util.EmojiParser;
+import com.android.mms.util.SmileyParser;
 
 /**
  * This class manages the view for given conversation.
@@ -196,8 +198,7 @@ public class ConversationListItem extends RelativeLayout implements Contact.Upda
         mAttachmentView.setVisibility(hasAttachment ? VISIBLE : GONE);
 
         // Date
-        mDateView.setText(MessageUtils.formatTimeStampString(context, conversation.getDate(),
-            MessagingPreferenceActivity.getFullDateEnabled(context)));
+        mDateView.setText(MessageUtils.formatTimeStampString(context, conversation.getDate()));
 
         // From.
         mFromView.setText(formatMessage());
@@ -212,7 +213,15 @@ public class ConversationListItem extends RelativeLayout implements Contact.Upda
 
         // Subject
         SmileyParser parser = SmileyParser.getInstance();
-        mSubjectView.setText(parser.addSmileySpans(conversation.getSnippet()));
+        CharSequence smileySubject = parser.addSmileySpans(conversation.getSnippet());
+        SharedPreferences prefs = PreferenceManager
+                .getDefaultSharedPreferences(mContext);
+        boolean enableEmojis = prefs.getBoolean(MessagingPreferenceActivity.ENABLE_EMOJIS, false);
+        if(enableEmojis) {
+            EmojiParser emojiParser = EmojiParser.getInstance();
+            smileySubject = emojiParser.addEmojiSpans(smileySubject);
+        }
+        mSubjectView.setText(smileySubject);
         LayoutParams subjectLayout = (LayoutParams)mSubjectView.getLayoutParams();
         // We have to make the subject left of whatever optional items are shown on the right.
         subjectLayout.addRule(RelativeLayout.LEFT_OF, hasAttachment ? R.id.attachment :

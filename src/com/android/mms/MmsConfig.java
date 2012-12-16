@@ -21,11 +21,11 @@ import java.io.IOException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import com.android.internal.telephony.TelephonyProperties;
-
 import android.content.Context;
 import android.content.res.XmlResourceParser;
 import android.util.Log;
+
+import com.android.internal.telephony.TelephonyProperties;
 
 public class MmsConfig {
     private static final String TAG = "MmsConfig";
@@ -76,6 +76,9 @@ public class MmsConfig {
     // converting to mms if we reach the required number of segments.
     private static boolean mEnableSplitSMS = false;
 
+    // Support to hide sprint VVM's 9016 text mesages.
+    private static boolean mEnableSprintVVM = false;
+
     // If mEnableMultipartSMS is true and mSmsToMmsTextThreshold > 1, then multi-part SMS messages
     // will be converted into a single mms message. For example, if the mms_config.xml file
     // specifies <int name="smsToMmsTextThreshold">4</int>, then on the 5th sms segment, the
@@ -100,6 +103,12 @@ public class MmsConfig {
 
     private static int mMaxSubjectLength = 40;  // maximum number of characters allowed for mms
                                                 // subject
+
+    // If mEnableGroupMms is true, a message with multiple recipients, regardless of contents,
+    // will be sent as a single MMS message with multiple "TO" fields set for each recipient.
+    // If mEnableGroupMms is false, the group MMS setting/preference will be hidden in the settings
+    // activity.
+    private static boolean mEnableGroupMms = true;
 
     public static void init(Context context) {
         if (LOCAL_LOGV) {
@@ -208,6 +217,10 @@ public class MmsConfig {
         return mEnableSplitSMS;
     }
 
+    public static boolean getSprintVVMEnabled() {
+        return mEnableSprintVVM;
+    }
+
     public static boolean getSlideDurationEnabled() {
         return mEnableSlideDuration;
     }
@@ -250,6 +263,10 @@ public class MmsConfig {
 
     public static int getMaxSubjectLength() {
         return mMaxSubjectLength;
+    }
+
+    public static boolean getGroupMmsEnabled() {
+        return mEnableGroupMms;
     }
 
     public static final void beginDocument(XmlPullParser parser, String firstElementName) throws XmlPullParserException, IOException
@@ -319,6 +336,8 @@ public class MmsConfig {
                             mEnableMultipartSMS = "true".equalsIgnoreCase(text);
                         } else if ("enableSplitSMS".equalsIgnoreCase(value)) {
                             mEnableSplitSMS = "true".equalsIgnoreCase(text);
+                        } else if ("enableSprintVVM".equalsIgnoreCase(value)) {
+                            mEnableSprintVVM = "true".equalsIgnoreCase(text);
                         } else if ("enableSlideDuration".equalsIgnoreCase(value)) {
                             mEnableSlideDuration = "true".equalsIgnoreCase(text);
                         } else if ("enableMMSReadReports".equalsIgnoreCase(value)) {
@@ -327,6 +346,8 @@ public class MmsConfig {
                             mEnableSMSDeliveryReports = "true".equalsIgnoreCase(text);
                         } else if ("enableMMSDeliveryReports".equalsIgnoreCase(value)) {
                             mEnableMMSDeliveryReports = "true".equalsIgnoreCase(text);
+                        } else if ("enableGroupMms".equalsIgnoreCase(value)) {
+                            mEnableGroupMms = "true".equalsIgnoreCase(text);
                         }
                     } else if ("int".equals(tag)) {
                         // int config tags go here
