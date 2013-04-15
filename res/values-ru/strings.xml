@@ -350,15 +350,21 @@
     <string name="pref_extra_settings">Дополнительные настройки</string>
 
     <!-- Strip unicode -->
-    <string name="pref_title_strip_unicode">Заменять юникод</string>
-    <string name="pref_summary_strip_unicode">Замена неподдерживаемых символов в сообщении обычными</string>
+    <string name="pref_title_unicode_stripping">Заменять юникод</string>
+    <string name="pref_unicode_stripping_leave_intact">Не заменять символы юникода</string>
+    <string name="pref_unicode_stripping_non_encodable">Заменять некодируемые символы</string>
+    <string name="pref_unicode_stripping_all">Заменять все символы юникода</string>
 
     <!-- Enable emojis -->
-    <string name="pref_title_enable_emojis">Включить emojis</string>
-    <string name="pref_summary_enable_emojis">Включить поддержку emojis, набора из 471 отличных юникод смайликов</string>
+    <string name="pref_title_enable_emojis">Включить emoji</string>
+    <string name="pref_summary_enable_emojis">Включить поддержку emoji, набора из 471 отличных юникод смайликов</string>
 
     <!-- Emoji Menu item -->
     <string name="menu_insert_emoji">Вставить emoji</string>
+
+    <!-- Enable SoftBank emoji encoding -->
+    <string name="pref_title_enable_softbank_encoding">SoftBank emoji</string>
+    <string name="pref_summary_enable_softbank_encoding">Использовать кодировку SoftBank для emoji</string>
 
     <!-- Settings item for boolean option for SMS Split Counter -->
     <string name="pref_title_sms_split_counter">Счётчик фрагментов</string>
@@ -452,6 +458,11 @@
     <string name="notification_multiple_title_privacy_mode">Новые сообщения</string>
     <string name="notification_multiple_text_privacy_mode"><xliff:g id="number" example="3">%1$s</xliff:g> сообщения (ий)</string>
     <string name="notification_ticker_privacy_mode">Получено новое сообщение</string>
+
+    <!-- Insert contact information -->
+    <string name="menu_insert_contact_info">Вставить контакт</string>
+    <string name="cannot_find_contact">Не удаётся вставить информацию из выбранного контакта</string>
+    <string name="insert_contact_info_positive_button">Вставить</string>
 
     <!-- CYANOGENMOD EDITS END -->
 

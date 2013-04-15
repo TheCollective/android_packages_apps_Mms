@@ -279,7 +279,7 @@
     <string name="save_ringtone" msgid="2310157075045201051">"Als Klingelton speichern"</string>
     <string name="saved_ringtone" msgid="3847363932276708626">"Klingelton gespeichert"</string>
     <string name="saved_ringtone_fail" msgid="4778500070919251116">"Klingelton konnte nicht gespeichert werden."</string>
-    <string name="menu_insert_smiley" msgid="4964504393061025071">"Smiley hinzufügen"</string>
+    <string name="menu_insert_smiley" msgid="4964504393061025071">"Smiley einfügen"</string>
     <string name="menu_group_participants" msgid="4288356090262299071">"Gruppenteilnehmer"</string>
     <string name="select_link_title" msgid="3371818607625768447">"Aktion wählen"</string>
     <string name="slide_number" msgid="1923958526266726635">"Dia <xliff:g id="NUMBER">%s</xliff:g>"</string>
@@ -346,6 +346,11 @@
     <!-- Message options - Add SMS to calendar -->
     <string name="menu_add_to_calendar">Zum Kalender hinzufügen</string>
 
+    <!-- Insert contact information -->
+    <string name="menu_insert_contact_info">Kontaktinfo einfügen</string>
+    <string name="cannot_find_contact">Die Informationen des gewählten Kontakts konnten nicht eingefügt werden</string>
+    <string name="insert_contact_info_positive_button">Einfügen</string>
+
     <!-- QM - Dialog box buttons -->
     <string name="button_close">Schließen</string>
     <string name="button_view">Anzeigen</string>
@@ -379,6 +384,7 @@
     <!-- Vibrate pattern -->
     <string name="pref_title_mms_notification_vibrate_pattern">Vibrationsmuster</string>
     <string name="pref_summary_mms_notification_vibrate_pattern">Vibrationsmuster ändern</string>
+    <string name="pref_title_mms_notification_vibrate_custom">Benutzerdefiniertes Muster</string>
     <string name="pref_text_mms_notification_vibrate_custom">Format (aus/an) in Millisekunden: aus, an, aus, an\u2026</string>
 
     <!-- Vibrate on call -->
@@ -445,13 +451,19 @@
     <string name="pref_extra_settings">Weitere Einstellungen</string>
 
     <!-- Strip unicode -->
-    <string name="pref_title_strip_unicode">Unicode entfernen</string>
-    <string name="pref_summary_strip_unicode">Zeichen ersetzen, die in SMS-Nachrichten nicht unterstützt werden</string>
+    <string name="pref_title_unicode_stripping">Unicode-Behandlung</string>
+    <string name="pref_unicode_stripping_leave_intact">Zeichen unberührt lassen</string>
+    <string name="pref_unicode_stripping_non_encodable">Unkodierbare Zeichen entfernen</string>
+    <string name="pref_unicode_stripping_all">Unicode komplett entfernen</string>
 
     <!-- Enable emojis -->
     <string name="pref_title_enable_emojis">Emoji-Unterstützung</string>
     <string name="pref_summary_enable_emojis">Unterstützung für Emojis aktivieren</string>
-    <string name="menu_insert_emoji">Emojis einfügen</string>
+    <string name="menu_insert_emoji">Emoji einfügen</string>
+
+    <!-- Enable SoftBank emoji encoding -->
+    <string name="pref_title_enable_softbank_encoding">SoftBank-Kodierung</string>
+    <string name="pref_summary_enable_softbank_encoding">Die SoftBank-Kodierung für Emojis verwenden</string>
 
     <!-- Full timestamps -->
     <string name="pref_title_mms_full_timestamp">Volle Datumsangabe</string>
@@ -466,6 +478,10 @@
     <string name="pref_keyboard_emoji">Emoticon-Taste anzeigen</string>
     <string name="pref_keyboard_new_line">Eingabetaste anzeigen</string>
     <string name="pref_keyboard_unknown">Unbekannt. Neue Auswahl treffen</string>
+
+    <!-- SMS Split Counter -->
+    <string name="pref_title_sms_split_counter">Nachrichtenzähler</string>
+    <string name="pref_summary_sms_split_counter">Bei mehrteiligen Nachrichten Zähler (z.B. \'1/2\') anzeigen</string>
 
     <!-- **** CYANOGENMOD ADDITIONS END **** -->
 </resources>

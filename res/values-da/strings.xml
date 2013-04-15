@@ -387,8 +387,10 @@
     <string name="pref_extra_settings">Ekstra indstillinger</string>
 
     <!-- Strip unicode -->
-    <string name="pref_title_strip_unicode">Fjern Unicode</string>
-    <string name="pref_summary_strip_unicode">Erstat gængse tegn, som ikke understøttes i 160-tegns SMS-beskeder</string>
+    <string name="pref_title_unicode_stripping">Fjern Unicode</string>
+    <string name="pref_unicode_stripping_leave_intact">Lad tegn være uberørte</string>
+    <string name="pref_unicode_stripping_non_encodable">Fjern ikke-kodbare tegn</string>
+    <string name="pref_unicode_stripping_all">Fjern alle Unicode-tegn</string>
 
     <!-- Enable emojis -->
     <string name="menu_insert_emoji">Indsæt smileys</string>
@@ -450,6 +452,11 @@
     <string name="notification_multiple_title_privacy_mode">Nye beskeder</string>
     <string name="notification_multiple_text_privacy_mode"><xliff:g id="number" example="3">%1$s</xliff:g> ulæste beskeder</string>
     <string name="notification_ticker_privacy_mode">Ny besked modtaget</string>
+
+    <!-- Insert contact information -->
+    <string name="menu_insert_contact_info">Indsæt kontaktinfo</string>
+    <string name="cannot_find_contact">Kan ikke indsætte kontaktinfo for den valgte kontakt</string>
+    <string name="insert_contact_info_positive_button">Indsæt</string>
 
     <!-- CYANOGENMOD ADDITIONS END -->
 </resources>
