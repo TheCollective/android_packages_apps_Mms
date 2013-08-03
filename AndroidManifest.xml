@@ -50,6 +50,13 @@
     <!-- Needed for QuickMessage -->
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
 
+    <!-- Grant permission to system apps to access receiver -->
+    <permission android:name="android.permission.MMS_PUSH"
+            android:protectionLevel="signatureOrSystem"
+            android:label="@string/label_mms_push"
+            android:description="@string/desc_mms_push"/>
+    <uses-permission android:name="android.permission.MMS_PUSH"/>
+
     <application android:name="MmsApp"
             android:label="@string/app_label"
             android:icon="@mipmap/ic_launcher_smsmms"
@@ -117,6 +124,11 @@
                <action android:name="android.intent.action.SEND" />
                <category android:name="android.intent.category.DEFAULT" />
                <data android:mimeType="image/*" />
+           </intent-filter>
+           <intent-filter>
+               <action android:name="android.intent.action.SEND" />
+               <category android:name="android.intent.category.DEFAULT" />
+               <data android:mimeType="text/plain" />
            </intent-filter>
            <intent-filter>
                <action android:name="android.intent.action.SEND_MULTIPLE" />
@@ -200,7 +212,17 @@
                 <action android:name="android.intent.action.CONTENT_CHANGED" />
             </intent-filter>
             <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+            <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".transaction.MmsSystemPushMsgReceiver"
+                android:permission="android.permission.MMS_PUSH">
+            <intent-filter>
+                <action android:name="android.intent.action.MMS_PUSH" />
             </intent-filter>
         </receiver>
 
@@ -222,18 +244,24 @@
             </intent-filter>
         </receiver>
 
+        <!-- Require sender permissions as it can be used to indirectly send SMS -->
+        <receiver android:name=".transaction.PrivilegedSmsReceiver"
+            android:permission="android.permission.SEND_SMS">
+            <intent-filter>
+                <action android:name="com.android.mms.transaction.SEND_MESSAGE" />
+            </intent-filter>
+        </receiver>
+
         <!-- Catch-all receiver for broadcasts that don't have associated security -->
         <receiver android:name=".transaction.SmsReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="com.android.mms.action.REMOVE_BLACKLIST" />
             </intent-filter>
             <intent-filter>
                 <action android:name="com.android.mms.transaction.MESSAGE_SENT" />
                 <!-- TODO Do a better data match here. -->
                 <data android:scheme="content" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND_MESSAGE" />
             </intent-filter>
         </receiver>
 
@@ -294,10 +322,10 @@
         </provider>
 
         <service android:name=".ui.NoConfirmationSendService"
-                 android:permission="android.permission.SEND_SMS_NO_CONFIRMATION"
+                 android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE"
                  android:exported="true" >
             <intent-filter>
-                <action android:name="com.android.mms.intent.action.SENDTO_NO_CONFIRMATION" />
+                <action android:name="android.intent.action.RESPOND_VIA_MESSAGE" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="sms" />
                 <data android:scheme="smsto" />

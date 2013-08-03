@@ -76,6 +76,7 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
+import com.android.internal.telephony.util.BlacklistUtils;
 import com.android.mms.MmsConfig;
 import com.android.mms.R;
 import com.android.mms.data.Contact;
@@ -89,6 +90,7 @@ import com.android.mms.ui.MessageUtils;
 import com.android.mms.ui.MessagingPreferenceActivity;
 import com.android.mms.util.EmojiParser;
 import com.android.mms.util.SmileyParser;
+import com.android.mms.util.UnicodeFilter;
 import com.google.android.mms.MmsException;
 
 import java.nio.charset.Charset;
@@ -153,6 +155,7 @@ public class QuickMessagePopup extends Activity implements
     private boolean mDarkTheme = false;
     private boolean mFullTimestamp = false;
     private int mUnicodeStripping = MessagingPreferenceActivity.UNICODE_STRIPPING_LEAVE_INTACT;
+    private UnicodeFilter mUnicodeFilter = null;
     private boolean mEnableEmojis = false;
     private int mInputMethod;
 
@@ -162,8 +165,9 @@ public class QuickMessagePopup extends Activity implements
 
     // Options menu items
     private static final int MENU_INSERT_SMILEY = 1;
-    private static final int MENU_INSERT_EMOJI = 3;
     private static final int MENU_ADD_TEMPLATE = 2;
+    private static final int MENU_INSERT_EMOJI = 3;
+    private static final int MENU_ADD_TO_BLACKLIST = 4;
 
     // Smiley and Emoji support
     private AlertDialog mSmileyDialog;
@@ -300,6 +304,7 @@ public class QuickMessagePopup extends Activity implements
                 QuickMessage qm = new QuickMessage(extras.getString(SMS_FROM_NAME_EXTRA),
                         extras.getString(SMS_FROM_NUMBER_EXTRA), nm);
                 mMessageList.add(qm);
+                mPagerAdapter.notifyDataSetChanged();
 
                 // If triggered from Quick Reply the keyboard should be visible immediately
                 if (extras.getBoolean(QR_SHOW_KEYBOARD_EXTRA, false)) {
@@ -386,6 +391,13 @@ public class QuickMessagePopup extends Activity implements
             .setIcon(android.R.drawable.ic_menu_add)
             .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
         }
+
+        // Add to Blacklist item (if enabled)
+        if (BlacklistUtils.isBlacklistEnabled(this)) {
+            menu.add(0, MENU_ADD_TO_BLACKLIST, 0, R.string.add_to_blacklist)
+                    .setIcon(R.drawable.ic_block_message_holo_dark)
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        }
     }
 
     @Override
@@ -401,6 +413,10 @@ public class QuickMessagePopup extends Activity implements
 
             case MENU_ADD_TEMPLATE:
                 selectTemplate();
+                return true;
+
+            case MENU_ADD_TO_BLACKLIST:
+                confirmAddBlacklist();
                 return true;
 
             default:
@@ -590,6 +606,33 @@ public class QuickMessagePopup extends Activity implements
         editText.setText("");
 
         mEmojiDialog.show();
+    }
+
+    /**
+     * Copied from ComposeMessageActivity.java, this method displays a pop-up a dialog confirming
+     * adding the current senders number to the blacklist
+     */
+    private void confirmAddBlacklist() {
+        // Get the sender number
+        final String number = mCurrentQm.getFromNumber()[0];
+        if (number == null) {
+            return;
+        }
+
+        // Show dialog
+        final String message = getString(R.string.add_to_blacklist_message, number);
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.add_to_blacklist)
+                .setMessage(message)
+                .setPositiveButton(R.string.alert_dialog_yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        BlacklistUtils.addOrUpdate(getApplicationContext(), number,
+                                BlacklistUtils.BLOCK_MESSAGES, BlacklistUtils.BLOCK_MESSAGES);
+                    }
+                })
+                .setNegativeButton(R.string.alert_dialog_no, null)
+                .show();
     }
 
     /**
@@ -825,6 +868,7 @@ public class QuickMessagePopup extends Activity implements
 
         // Clear the messages list
         mMessageList.clear();
+        mPagerAdapter.notifyDataSetChanged();
 
         if (DEBUG)
             Log.d(LOG_TAG, "clearNotification(): Message list cleared. Size = " + mMessageList.size());
@@ -938,122 +982,6 @@ public class QuickMessagePopup extends Activity implements
     //==========================================================
 
     /**
-     * Class copied from ComposeMessageActivity.java
-     * InputFilter which attempts to substitute characters that cannot be
-     * encoded in the limited GSM 03.38 character set. In many cases this will
-     * prevent the keyboards auto-correction feature from inserting characters
-     * that would switch the message from 7-bit GSM encoding (160 char limit)
-     * to 16-bit Unicode encoding (70 char limit).
-     */
-    private static class StripUnicode implements InputFilter {
-
-        private CharsetEncoder gsm =
-            Charset.forName("gsm-03.38-2000").newEncoder();
-
-        private Pattern diacritics =
-            Pattern.compile("\\p{InCombiningDiacriticalMarks}");
-
-        private boolean mStripNonDecodableOnly = false;
-
-        StripUnicode(boolean stripping) {
-            mStripNonDecodableOnly = stripping;
-        }
-
-        public CharSequence filter(CharSequence source, int start, int end,
-                                   Spanned dest, int dstart, int dend) {
-
-            Boolean unfiltered = true;
-            StringBuilder output = new StringBuilder(end - start);
-
-            for (int i = start; i < end; i++) {
-                char c = source.charAt(i);
-
-                // Character is encodable by GSM, skip filtering
-                if (mStripNonDecodableOnly && gsm.canEncode(c)) {
-                    output.append(c);
-                }
-                // Character requires Unicode, try to replace it
-                else {
-                    unfiltered = false;
-                    String s = String.valueOf(c);
-
-                    // Try normalizing the character into Unicode NFKD form and
-                    // stripping out diacritic mark characters.
-                    s = Normalizer.normalize(s, Normalizer.Form.NFKD);
-                    s = diacritics.matcher(s).replaceAll("");
-
-                    // Special case characters that don't get stripped by the
-                    // above technique.
-                    s = s.replace("Œ", "OE");
-                    s = s.replace("œ", "oe");
-                    s = s.replace("Ł", "L");
-                    s = s.replace("ł", "l");
-                    s = s.replace("Đ", "DJ");
-                    s = s.replace("đ", "dj");
-                    s = s.replace("Α", "A");
-                    s = s.replace("Β", "B");
-                    s = s.replace("Ε", "E");
-                    s = s.replace("Ζ", "Z");
-                    s = s.replace("Η", "H");
-                    s = s.replace("Ι", "I");
-                    s = s.replace("Κ", "K");
-                    s = s.replace("Μ", "M");
-                    s = s.replace("Ν", "N");
-                    s = s.replace("Ο", "O");
-                    s = s.replace("Ρ", "P");
-                    s = s.replace("Τ", "T");
-                    s = s.replace("Υ", "Y");
-                    s = s.replace("Χ", "X");
-                    s = s.replace("α", "A");
-                    s = s.replace("β", "B");
-                    s = s.replace("γ", "Γ");
-                    s = s.replace("δ", "Δ");
-                    s = s.replace("ε", "E");
-                    s = s.replace("ζ", "Z");
-                    s = s.replace("η", "H");
-                    s = s.replace("θ", "Θ");
-                    s = s.replace("ι", "I");
-                    s = s.replace("κ", "K");
-                    s = s.replace("λ", "Λ");
-                    s = s.replace("μ", "M");
-                    s = s.replace("ν", "N");
-                    s = s.replace("ξ", "Ξ");
-                    s = s.replace("ο", "O");
-                    s = s.replace("π", "Π");
-                    s = s.replace("ρ", "P");
-                    s = s.replace("σ", "Σ");
-                    s = s.replace("τ", "T");
-                    s = s.replace("υ", "Y");
-                    s = s.replace("φ", "Φ");
-                    s = s.replace("χ", "X");
-                    s = s.replace("ψ", "Ψ");
-                    s = s.replace("ω", "Ω");
-                    s = s.replace("ς", "Σ");
-
-                    output.append(s);
-                }
-            }
-
-            // No changes were attempted, so don't return anything
-            if (unfiltered) {
-                return null;
-            }
-            // Source is a spanned string, so copy the spans from it
-            else if (source instanceof Spanned) {
-                SpannableString spannedoutput = new SpannableString(output);
-                TextUtils.copySpansFrom(
-                    (Spanned) source, start, end, null, spannedoutput, 0);
-
-                return spannedoutput;
-            }
-            // Source is a vanilla charsequence, so return output as-is
-            else {
-                return output;
-            }
-        }
-    }
-
-    /**
      * Message Pager class, used to display and navigate through the ViewPager pages
      */
     private class MessagePagerAdapter extends PagerAdapter
@@ -1114,8 +1042,15 @@ public class QuickMessagePopup extends Activity implements
                         | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
                 qmReplyText.setText(qm.getReplyText());
                 qmReplyText.setSelection(qm.getReplyText().length());
+
+                if (mUnicodeStripping != MessagingPreferenceActivity.UNICODE_STRIPPING_LEAVE_INTACT) {
+                    boolean stripNonDecodableOnly =
+                            mUnicodeStripping == MessagingPreferenceActivity.UNICODE_STRIPPING_NON_DECODABLE;
+                    mUnicodeFilter = new UnicodeFilter(stripNonDecodableOnly);
+                }
+
                 qmReplyText.addTextChangedListener(new QmTextWatcher(mContext, qmTextCounter, qmSendButton,
-                        qmTemplatesButton, mNumTemplates));
+                        qmTemplatesButton, mNumTemplates, mUnicodeFilter));
                 qmReplyText.setOnEditorActionListener(new OnEditorActionListener() {
                     @Override
                     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -1147,15 +1082,7 @@ public class QuickMessagePopup extends Activity implements
                 });
 
                 LengthFilter lengthFilter = new LengthFilter(MmsConfig.getMaxTextLimit());
-
-                if (mUnicodeStripping != MessagingPreferenceActivity.UNICODE_STRIPPING_LEAVE_INTACT) {
-                    boolean stripNonDecodableOnly = mUnicodeStripping == MessagingPreferenceActivity
-                            .UNICODE_STRIPPING_NON_DECODABLE;
-                    qmReplyText.setFilters(new InputFilter[] { new StripUnicode(stripNonDecodableOnly),
-                            lengthFilter });
-                } else {
-                    qmReplyText.setFilters(new InputFilter[] { lengthFilter });
-                }
+                qmReplyText.setFilters(new InputFilter[] { lengthFilter });
 
                 QmTextWatcher.getQuickReplyCounterText(qmReplyText.getText().toString(),
                         qmTextCounter, qmSendButton, qmTemplatesButton, mNumTemplates);
@@ -1203,6 +1130,9 @@ public class QuickMessagePopup extends Activity implements
          * @param qm - qm we are replying to (for sender details)
          */
         private void sendMessageAndMoveOn(String message, QuickMessage qm) {
+            if (mUnicodeFilter != null) {
+                message = mUnicodeFilter.filter(message).toString();
+            }
             sendQuickMessage(message, qm);
             // Close the current QM and move on
             int numMessages = mMessageList.size();

@@ -777,12 +777,6 @@
     <!-- In message list items, this string builds the timestamp line when the message is in a group [CHAR LIMIT=NONE] -->
     <string name="message_timestamp_format"><xliff:g id="string" example="Fred Flinstone">%1$s</xliff:g>\u0020-\u0020<xliff:g id="string" example="9:39AM">%2$s</xliff:g></string>
 
-    <!-- Multi Contact selector -->
-    <string name="pref_multi_select">Easy Selector</string>
-    <string name="pref_multi_select_summary">Select multiple contacts using a checkbox</string>
-    <string name="add_recipients">Add recipients</string>
-    <string name="add_recipients_positive_button">Add</string>
-
     <!-- Message options - Add SMS to calendar -->
     <string name="menu_add_to_calendar">Add to calendar</string>
 
@@ -819,10 +813,6 @@
     <string name="pref_summary_mms_notification_vibrate_pattern">Change vibrate pattern</string>
     <string name="pref_title_mms_notification_vibrate_custom">Custom vibrate pattern</string>
     <string name="pref_text_mms_notification_vibrate_custom">Format off/on in milliseconds: off, on, off, on\u2026</string>
-
-    <!-- Vibrate on call -->
-    <string name="pref_title_mms_notification_vibrate_call">Vibrate on call</string>
-    <string name="pref_summary_mms_notification_vibrate_call">Allow vibrate while on a call</string>
 
     <!-- QUICKMESSAGE -->
     <string name="pref_quickmessage">Quick reply</string>
@@ -863,9 +853,9 @@
     <string name="template_not_present_error">There are no defined templates</string>
     <string name="template_not_present_error_title">Error</string>
     <string name="template_select">Select a template</string>
-    <string name="template_cancel_confirm_title">Warning</string>
-    <string name="template_cancel_confirm_text">The template will be deleted. Continue?</string>
-    <string name="gestures_already_present">Warning: A similar gesture is associated to another template!</string>
+    <string name="template_confirm_dialog_title">Delete?</string>
+    <string name="gestures_already_present">A similar gesture is already associated with another template</string>
+    <string name="select_template">Select templates</string>
 
     <!-- Show gesture trace -->
     <string name="pref_title_templates_show_gesture">Gesture</string>
@@ -887,6 +877,10 @@
     <string name="pref_title_enable_emojis">Emoji support</string>
     <string name="pref_summary_enable_emojis">Enable support for unicode emojis, a set of 471 nice emoticons</string>
     <string name="menu_insert_emoji">Insert emojis</string>
+
+    <!-- Enable quick emojis -->
+    <string name="pref_title_enable_quick_emojis">Quick emoji button</string>
+    <string name="pref_summary_enable_quick_emojis">Display a button next to the text-input area for quick emoji access</string>
 
     <!-- Enable SoftBank emoji encoding -->
     <string name="pref_title_enable_softbank_encoding">SoftBank emoji</string>
@@ -915,5 +909,31 @@
     <string name="menu_insert_contact_info">Insert contact info</string>
     <string name="cannot_find_contact">Can\'t insert information of the chosen contact</string>
     <string name="insert_contact_info_positive_button">Insert</string>
+
+    <!-- MMS push permission -->
+    <string name="label_mms_push">MMS Push</string>
+    <string name="desc_mms_push">Pushes MMS from outbox to the network</string>
+
+    <!-- Blacklist preferences -->
+    <string name="blacklist_title">Blacklist</string>
+    <string name="blacklist_summary_disabled">Disabled</string>
+    <string name="blacklist_summary">Incoming messages from phone numbers in the blacklist will be blocked</string>
+
+    <!-- Blacklist notifications -->
+    <string name="blacklist_notification">Blocked a message from %s</string>
+    <string name="blacklist_notification_private_number">Blocked a message from a private number</string>
+    <string name="blacklist_notification_list_private">Private</string>
+    <string name="blacklist_notification_unknown_number">Blocked a message from unknown number %s</string>
+    <string name="blacklist_notification_multiple"><xliff:g id="count">%d</xliff:g> messages were blocked</string>
+    <string name="unblock_number">Unblock</string>
+
+    <!-- Blacklist management -->
+    <string name="add_to_blacklist">Add to blacklist</string>
+    <string name="add_to_blacklist_message">Future messages from %s will be blocked</string>
+
+    <!-- Generic blacklist handling -->
+    <string name="alert_dialog_yes">Yes</string>
+    <string name="alert_dialog_no">No</string>
+
 </resources>
 

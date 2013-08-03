@@ -70,7 +70,6 @@ public class IconListAdapter extends ArrayAdapter<IconListAdapter.IconListItem> 
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
         View view;
         if (convertView == null) {
             view = mInflater.inflate(mResource, parent, false);

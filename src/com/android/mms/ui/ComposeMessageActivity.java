@@ -123,15 +123,15 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.LinearLayout;
 
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
-import com.android.internal.util.CharSequences;
+import com.android.internal.telephony.util.BlacklistUtils;
 import com.android.mms.LogTag;
 import com.android.mms.MmsApp;
 import com.android.mms.MmsConfig;
@@ -158,6 +158,7 @@ import com.android.mms.util.EmojiParser;
 import com.android.mms.util.PhoneNumberFormatter;
 import com.android.mms.util.SendingProgressTokenManager;
 import com.android.mms.util.SmileyParser;
+import com.android.mms.util.UnicodeFilter;
 import com.android.mms.widget.MmsWidgetProvider;
 import com.google.android.mms.ContentType;
 import com.google.android.mms.MmsException;
@@ -255,6 +256,7 @@ public class ComposeMessageActivity extends Activity
     private static final int MENU_GROUP_PARTICIPANTS    = 32;
     private static final int MENU_INSERT_EMOJI          = 33;
     private static final int MENU_ADD_TEMPLATE          = 34;
+    private static final int MENU_ADD_TO_BLACKLIST      = 35;
 
     private static final int DIALOG_TEMPLATE_SELECT     = 1;
     private static final int DIALOG_TEMPLATE_NOT_AVAILABLE = 2;
@@ -274,6 +276,9 @@ public class ComposeMessageActivity extends Activity
     private static final int CHARS_REMAINING_BEFORE_COUNTER_SHOWN = 10;
 
     private static final long NO_DATE_FOR_DIALOG = -1L;
+
+    private static final String KEY_EXIT_ON_SENT = "exit_on_sent";
+    private static final String KEY_FORWARDED_MESSAGE = "forwarded_message";
 
     private static final String EXIT_ECM_RESULT = "exit_ecm_result";
 
@@ -303,8 +308,10 @@ public class ComposeMessageActivity extends Activity
 
     private Conversation mConversation;     // Conversation we are working in
 
-    private boolean mExitOnSent;            // Should we finish() after sending a message?
-                                            // TODO: mExitOnSent is obsolete -- remove
+    // When mSendDiscreetMode is true, this activity only allows a user to type in and send
+    // a single sms, send the message, and then exits. The message history and menus are hidden.
+    private boolean mSendDiscreetMode;
+    private boolean mForwardMessageMode;
 
     private View mTopPanel;                 // View containing the recipient and subject editors
     private View mBottomPanel;              // View containing the text editor, send button, ec.
@@ -313,6 +320,7 @@ public class ComposeMessageActivity extends Activity
     private TextView mSendButtonMms;        // Press to send mms
     private ImageButton mSendButtonSms;     // Press to send sms
     private EditText mSubjectTextEditor;    // Text editor for MMS subject
+    private ImageButton mQuickEmoji;
 
     private AttachmentEditor mAttachmentEditor;
     private View mAttachmentEditorScrollView;
@@ -322,7 +330,6 @@ public class ComposeMessageActivity extends Activity
 
     private RecipientsEditor mRecipientsEditor;  // UI control for editing recipients
     private ImageButton mRecipientsPicker;       // UI control for recipients picker
-    private ImageButton mRecipientsSelector;       // UI control for recipients selector
 
     // For HW keyboard, 'mIsKeyboardOpen' indicates if the HW keyboard is open.
     // For SW keyboard, 'mIsKeyboardOpen' should always be true.
@@ -344,6 +351,8 @@ public class ComposeMessageActivity extends Activity
     private AlertDialog mSmileyDialog;
     private AlertDialog mEmojiDialog;
     private View mEmojiView;
+    private boolean mEnableEmojis;
+    private boolean mEnableQuickEmojis;
 
     private boolean mWaitingForSubActivity;
     private int mLastRecipientCount;            // Used for warning the user on too many recipients.
@@ -393,6 +402,8 @@ public class ComposeMessageActivity extends Activity
     // we should not load the draft.
     private boolean mShouldLoadDraft;
 
+    private UnicodeFilter mUnicodeFilter = null;
+
     private Handler mHandler = new Handler();
 
     // keys for extras and icicles
@@ -408,123 +419,6 @@ public class ComposeMessageActivity extends Activity
         // Prepend current thread ID and name of calling method to the message.
         logMsg = "[" + tid + "] [" + methodName + "] " + logMsg;
         Log.d(TAG, logMsg);
-    }
-
-    //==========================================================
-    // Inner classes
-    //==========================================================
-
-    // InputFilter which attempts to substitute characters that cannot be
-    // encoded in the limited GSM 03.38 character set. In many cases this will
-    // prevent the keyboards auto-correction feature from inserting characters
-    // that would switch the message from 7-bit GSM encoding (160 char limit)
-    // to 16-bit Unicode encoding (70 char limit).
-
-    private static class StripUnicode implements InputFilter {
-        private CharsetEncoder gsm =
-            Charset.forName("gsm-03.38-2000").newEncoder();
-
-        private Pattern diacritics =
-            Pattern.compile("\\p{InCombiningDiacriticalMarks}");
-
-        private boolean mStripNonDecodableOnly = false;
-
-        StripUnicode(boolean stripping) {
-            mStripNonDecodableOnly = stripping;
-        }
-
-        public CharSequence filter(CharSequence source, int start, int end,
-                                   Spanned dest, int dstart, int dend) {
-
-            Boolean unfiltered = true;
-            StringBuilder output = new StringBuilder(end - start);
-
-            for (int i = start; i < end; i++) {
-                char c = source.charAt(i);
-
-                // Character is encodable by GSM, skip filtering
-                if (mStripNonDecodableOnly && gsm.canEncode(c)) {
-                    output.append(c);
-                }
-                // Character requires Unicode, try to replace it
-                else {
-                    unfiltered = false;
-                    String s = String.valueOf(c);
-
-                    // Try normalizing the character into Unicode NFKD form and
-                    // stripping out diacritic mark characters.
-                    s = Normalizer.normalize(s, Normalizer.Form.NFKD);
-                    s = diacritics.matcher(s).replaceAll("");
-
-                    // Special case characters that don't get stripped by the
-                    // above technique.
-                    s = s.replace("Œ", "OE");
-                    s = s.replace("œ", "oe");
-                    s = s.replace("Ł", "L");
-                    s = s.replace("ł", "l");
-                    s = s.replace("Đ", "DJ");
-                    s = s.replace("đ", "dj");
-                    s = s.replace("Α", "A");
-                    s = s.replace("Β", "B");
-                    s = s.replace("Ε", "E");
-                    s = s.replace("Ζ", "Z");
-                    s = s.replace("Η", "H");
-                    s = s.replace("Ι", "I");
-                    s = s.replace("Κ", "K");
-                    s = s.replace("Μ", "M");
-                    s = s.replace("Ν", "N");
-                    s = s.replace("Ο", "O");
-                    s = s.replace("Ρ", "P");
-                    s = s.replace("Τ", "T");
-                    s = s.replace("Υ", "Y");
-                    s = s.replace("Χ", "X");
-                    s = s.replace("α", "A");
-                    s = s.replace("β", "B");
-                    s = s.replace("γ", "Γ");
-                    s = s.replace("δ", "Δ");
-                    s = s.replace("ε", "E");
-                    s = s.replace("ζ", "Z");
-                    s = s.replace("η", "H");
-                    s = s.replace("θ", "Θ");
-                    s = s.replace("ι", "I");
-                    s = s.replace("κ", "K");
-                    s = s.replace("λ", "Λ");
-                    s = s.replace("μ", "M");
-                    s = s.replace("ν", "N");
-                    s = s.replace("ξ", "Ξ");
-                    s = s.replace("ο", "O");
-                    s = s.replace("π", "Π");
-                    s = s.replace("ρ", "P");
-                    s = s.replace("σ", "Σ");
-                    s = s.replace("τ", "T");
-                    s = s.replace("υ", "Y");
-                    s = s.replace("φ", "Φ");
-                    s = s.replace("χ", "X");
-                    s = s.replace("ψ", "Ψ");
-                    s = s.replace("ω", "Ω");
-                    s = s.replace("ς", "Σ");
-
-                    output.append(s);
-                }
-            }
-
-            // No changes were attempted, so don't return anything
-            if (unfiltered) {
-                return null;
-            }
-            // Source is a spanned string, so copy the spans from it
-            else if (source instanceof Spanned) {
-                SpannableString spannedoutput = new SpannableString(output);
-                TextUtils.copySpansFrom(
-                    (Spanned) source, start, end, null, spannedoutput, 0);
-
-                return spannedoutput;
-            }
-            // Source is a vanilla charsequence, so return output as-is
-            else {
-                return output;
-            }
-        }
     }
 
     private void editSlideshow() {
@@ -1441,8 +1335,8 @@ public class ComposeMessageActivity extends Activity
                 // on the UI thread.
                 Intent intent = createIntent(ComposeMessageActivity.this, 0);
 
-                intent.putExtra("exit_on_sent", true);
-                intent.putExtra("forwarded_message", true);
+                intent.putExtra(KEY_EXIT_ON_SENT, true);
+                intent.putExtra(KEY_FORWARDED_MESSAGE, true);
                 if (mTempThreadId > 0) {
                     intent.putExtra(THREAD_ID, mTempThreadId);
                 }
@@ -1808,6 +1702,9 @@ public class ComposeMessageActivity extends Activity
                 if (isDrm) {
                     extension += DrmUtils.getConvertExtension(type);
                 }
+                // Remove leading periods. The gallery ignores files starting with a period.
+                fileName = fileName.replaceAll("^.", "");
+
                 File file = getUniqueDestination(dir + fileName, extension);
 
                 // make sure the path is valid and directories created for this file.
@@ -1970,15 +1867,12 @@ public class ComposeMessageActivity extends Activity
             View stubView = stub.inflate();
             mRecipientsEditor = (RecipientsEditor) stubView.findViewById(R.id.recipients_editor);
             mRecipientsPicker = (ImageButton) stubView.findViewById(R.id.recipients_picker);
-            mRecipientsSelector = (ImageButton) stubView.findViewById(R.id.recipients_selector);
         } else {
             mRecipientsEditor = (RecipientsEditor)findViewById(R.id.recipients_editor);
             mRecipientsEditor.setVisibility(View.VISIBLE);
             mRecipientsPicker = (ImageButton)findViewById(R.id.recipients_picker);
-            mRecipientsSelector = (ImageButton)findViewById(R.id.recipients_selector);
         }
         mRecipientsPicker.setOnClickListener(this);
-        mRecipientsSelector.setOnClickListener(this);
 
         mRecipientsEditor.setAdapter(new ChipsRecipientAdapter(this));
         mRecipientsEditor.populate(recipients);
@@ -2086,21 +1980,28 @@ public class ComposeMessageActivity extends Activity
         initResourceRefs();
 
         LengthFilter lengthFilter = new LengthFilter(MmsConfig.getMaxTextLimit());
+        mTextEditor.setFilters(new InputFilter[] { lengthFilter });
 
         if (unicodeStripping != MessagingPreferenceActivity.UNICODE_STRIPPING_LEAVE_INTACT) {
-            boolean stripNonDecodableOnly = unicodeStripping == MessagingPreferenceActivity
-                    .UNICODE_STRIPPING_NON_DECODABLE;
-            mTextEditor.setFilters(new InputFilter[] { new StripUnicode(stripNonDecodableOnly),
-                    lengthFilter });
-        } else {
-            mTextEditor.setFilters(new InputFilter[] { lengthFilter });
+            boolean stripNonDecodableOnly =
+                    unicodeStripping == MessagingPreferenceActivity.UNICODE_STRIPPING_NON_DECODABLE;
+            mUnicodeFilter = new UnicodeFilter(stripNonDecodableOnly);
         }
 
         mContentResolver = getContentResolver();
         mBackgroundQueryHandler = new BackgroundQueryHandler(mContentResolver);
 
+        mEnableEmojis = prefs.getBoolean(MessagingPreferenceActivity.ENABLE_EMOJIS, false);
+        mEnableQuickEmojis = prefs.getBoolean(MessagingPreferenceActivity.ENABLE_QUICK_EMOJIS, false);
+        if (mEnableQuickEmojis && mEnableEmojis) {
+            mQuickEmoji.setVisibility(View.VISIBLE);
+
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)mTextEditor.getLayoutParams();
+            params.setMargins(0, 0, 0, 0);
+            mTextEditor.setLayoutParams(params);
+        }
+
         initialize(savedInstanceState, 0);
-        updateEasySelector();
 
         if (TRACE) {
             android.os.Debug.startMethodTracing("compose");
@@ -2410,7 +2311,7 @@ public class ComposeMessageActivity extends Activity
      * @param debugFlag shows where this is being called from
      */
     private void loadMessagesAndDraft(int debugFlag) {
-        if (!mMessagesAndDraftLoaded) {
+        if (!mSendDiscreetMode && !mMessagesAndDraftLoaded) {
             if (Log.isLoggable(LogTag.APP, Log.VERBOSE)) {
                 Log.v(TAG, "### CMA.loadMessagesAndDraft: flag=" + debugFlag);
             }
@@ -2452,8 +2353,11 @@ public class ComposeMessageActivity extends Activity
 
         mWorkingMessage.writeStateToBundle(outState);
 
-        if (mExitOnSent) {
-            outState.putBoolean("exit_on_sent", mExitOnSent);
+        if (mSendDiscreetMode) {
+            outState.putBoolean(KEY_EXIT_ON_SENT, mSendDiscreetMode);
+        }
+        if (mForwardMessageMode) {
+            outState.putBoolean(KEY_FORWARDED_MESSAGE, mForwardMessageMode);
         }
     }
 
@@ -2497,7 +2401,6 @@ public class ComposeMessageActivity extends Activity
         mIsRunning = true;
         updateThreadIdIfRunning();
         mConversation.markAsRead(true);
-        updateEasySelector();
     }
 
     @Override
@@ -2856,6 +2759,12 @@ public class ComposeMessageActivity extends Activity
 
         menu.clear();
 
+        if (mSendDiscreetMode && !mForwardMessageMode) {
+            // When we're in send-a-single-message mode from the lock screen, don't show
+            // any menus.
+            return true;
+        }
+
         if (isRecipientCallable()) {
             MenuItem item = menu.add(0, MENU_CALL_RECIPIENT, 0, R.string.menu_call)
                 .setIcon(R.drawable.ic_menu_call)
@@ -2892,8 +2801,8 @@ public class ComposeMessageActivity extends Activity
                     R.drawable.ic_menu_emoticons);
             SharedPreferences prefs = PreferenceManager
                     .getDefaultSharedPreferences((Context) ComposeMessageActivity.this);
-            boolean enableEmojis = prefs.getBoolean(MessagingPreferenceActivity.ENABLE_EMOJIS, false);
-            if (enableEmojis) {
+
+            if (mEnableEmojis) {
                 menu.add(0, MENU_INSERT_EMOJI, 0, R.string.menu_insert_emoji);
             }
         }
@@ -2919,6 +2828,13 @@ public class ComposeMessageActivity extends Activity
         }
 
         buildAddAddressToContactMenuItem(menu);
+
+        // Add to Blacklist item (if enabled)
+        if (BlacklistUtils.isBlacklistEnabled(this)) {
+            menu.add(0, MENU_ADD_TO_BLACKLIST, 0, R.string.add_to_blacklist)
+                    .setIcon(R.drawable.ic_block_message_holo_dark)
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        }
 
         menu.add(0, MENU_PREFERENCES, 0, R.string.menu_preferences).setIcon(
                 android.R.drawable.ic_menu_preferences);
@@ -3034,9 +2950,47 @@ public class ComposeMessageActivity extends Activity
             case MENU_ADD_TEMPLATE:
                 startLoadingTemplates();
                 break;
+            case MENU_ADD_TO_BLACKLIST:
+                confirmAddBlacklist();
+                break;
         }
 
         return true;
+    }
+
+    /**
+     *  Pop up a dialog confirming adding the current number to the blacklist
+     */
+    private void confirmAddBlacklist() {
+        //TODO: get the sender number
+        final String number = getSenderNumber();
+        if (TextUtils.isEmpty(number)) {
+            return;
+        }
+
+        // Show dialog
+        final String message = getString(R.string.add_to_blacklist_message, number);
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.add_to_blacklist)
+                .setMessage(message)
+                .setPositiveButton(R.string.alert_dialog_yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        BlacklistUtils.addOrUpdate(getApplicationContext(), number,
+                                BlacklistUtils.BLOCK_MESSAGES, BlacklistUtils.BLOCK_MESSAGES);
+                    }
+                })
+                .setNegativeButton(R.string.alert_dialog_no, null)
+                .show();
+    }
+
+    private String getSenderNumber() {
+        if (isRecipientCallable()) {
+            return getRecipients().get(0).getNumber().toString();
+        }
+
+        // Not a callable sender
+        return null;
     }
 
     private void confirmDeleteThread(long threadId) {
@@ -3465,7 +3419,7 @@ public class ComposeMessageActivity extends Activity
 
         // If this is a forwarded message, it will have an Intent extra
         // indicating so.  If not, bail out.
-        if (intent.getBooleanExtra("forwarded_message", false) == false) {
+        if (!mForwardMessageMode) {
             return false;
         }
 
@@ -3592,13 +3546,13 @@ public class ComposeMessageActivity extends Activity
 
         CharSequence text = mWorkingMessage.getText();
 
+        SharedPreferences prefs = PreferenceManager
+                .getDefaultSharedPreferences((Context) ComposeMessageActivity.this);
+
         // TextView.setTextKeepState() doesn't like null input.
         if (text != null) {
             // Restore the emojis if necessary
-            SharedPreferences prefs = PreferenceManager
-                    .getDefaultSharedPreferences((Context) ComposeMessageActivity.this);
-            boolean enableEmojis = prefs.getBoolean(MessagingPreferenceActivity.ENABLE_EMOJIS, false);
-            if (enableEmojis) {
+            if (mEnableEmojis) {
                 mTextEditor.setTextKeepState(EmojiParser.getInstance().addEmojiSpans(text));
             } else {
                 mTextEditor.setTextKeepState(text);
@@ -3635,9 +3589,9 @@ public class ComposeMessageActivity extends Activity
             confirmSendMessageIfNeeded();
         } else if ((v == mRecipientsPicker)) {
             launchMultiplePhonePicker();
-        } else if ((v == mRecipientsSelector)) {
-            //Toast.makeText(getApplicationContext(), "click sur selecteur", Toast.LENGTH_LONG).show();
-            launchRecipientsSelector();
+        }
+        else if((v == mQuickEmoji)) {
+            showEmojiDialog();
         }
     }
 
@@ -3659,100 +3613,6 @@ public class ComposeMessageActivity extends Activity
             intent.putExtra(Intents.EXTRA_PHONE_URIS, uris);
         }
         startActivityForResult(intent, REQUEST_CODE_PICK);
-    }
-
-    private ArrayList<CharSequence[]> getContactsNumbersInfo() {
-        final String[] projection = new String[] {
-                Phone.NUMBER,
-                Phone.TYPE,
-                Phone.LABEL,
-                Phone.DISPLAY_NAME,
-                Phone.IS_PRIMARY
-        };
-        final String where = Phone.NUMBER + " NOT NULL";
-        final String orderBy = Phone.DISPLAY_NAME + ", "
-              + "CASE WHEN " + Phone.IS_PRIMARY + " = 0 THEN 1 ELSE 0 END";
-
-        final Cursor cursor = getContentResolver().query(Phone.CONTENT_URI,
-                projection, where, null, orderBy);
-
-        if (cursor == null) {
-            return null;
-        }
-
-        final int count = cursor.getCount();
-
-        if (count == 0) {
-            cursor.close();
-            return null;
-        }
-
-        final ArrayList<CharSequence[]> items = new ArrayList<CharSequence[]>(count);
-
-        for (int i = 0; i < count; i++) {
-            cursor.moveToPosition(i);
-
-            String number = cursor.getString(0);
-            int type = cursor.getInt(1);
-            String label = cursor.getString(2);
-            String name = cursor.getString(3);
-
-            items.add(i, new CharSequence[] {name, Phone.getTypeLabel(getResources(), type, label), number});
-        }
-
-        cursor.close();
-
-        return items;
-    }
-
-    private void launchRecipientsSelector() {
-        final int displayNameColumn = 0;
-        final int labelColumn = 1;
-        final int numberColumn = 2;
-
-        final ArrayList<CharSequence[]> data = getContactsNumbersInfo();
-
-        if (data == null) {
-            return;
-        }
-
-        final int count = data.size();
-        final CharSequence[] entries = new CharSequence[count];
-        for (int i = 0; i < count; i++) {
-            entries[i] = data.get(i)[displayNameColumn] + " - " + data.get(i)[labelColumn]
-                    + "\n" + data.get(i)[numberColumn];
-        }
-
-        final boolean[] numbersChecked = new boolean[entries.length];
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setIcon(R.drawable.ic_contact_picture);
-        builder.setTitle(R.string.add_recipients);
-
-        builder.setMultiChoiceItems(entries, null, new DialogInterface.OnMultiChoiceClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                numbersChecked[which] = isChecked;
-            }
-        });
-
-        builder.setPositiveButton(R.string.add_recipients_positive_button,
-                new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                for (int i = 0; i < count; i++) {
-                    if (numbersChecked[i]) {
-                        int start = mRecipientsEditor.getSelectionStart();
-                        int end = mRecipientsEditor.getSelectionEnd();
-                        mRecipientsEditor.getText().replace(
-                                Math.min(start, end), Math.max(start, end), data.get(i)[numberColumn] + ",");
-                    }
-                }
-            }
-        });
-        builder.setNegativeButton(android.R.string.cancel, null);
-
-        builder.show();
     }
 
     @Override
@@ -3801,6 +3661,8 @@ public class ComposeMessageActivity extends Activity
 
             updateSendButtonState();
 
+            // strip unicode for counting characters
+            s = stripUnicodeIfRequested(s);
             updateCounter(s, start, before, count);
 
             ensureCorrectButtonHeight();
@@ -3896,6 +3758,8 @@ public class ComposeMessageActivity extends Activity
         mAttachmentEditor = (AttachmentEditor) findViewById(R.id.attachment_editor);
         mAttachmentEditor.setHandler(mAttachmentEditorHandler);
         mAttachmentEditorScrollView = findViewById(R.id.attachment_editor_scroll_view);
+        mQuickEmoji = (ImageButton) mBottomPanel.findViewById(R.id.quick_emoji_button_mms);
+        mQuickEmoji.setOnClickListener(this);
     }
 
     private void confirmDeleteDialog(OnClickListener listener, boolean locked) {
@@ -3927,6 +3791,9 @@ public class ComposeMessageActivity extends Activity
     }
 
     private void startMsgListQuery(int token) {
+        if (mSendDiscreetMode) {
+            return;
+        }
         Uri conversationUri = mConversation.getUri();
 
         if (conversationUri == null) {
@@ -3971,7 +3838,7 @@ public class ComposeMessageActivity extends Activity
         mMsgListAdapter.setMsgListItemHandler(mMessageListItemHandler);
         mMsgListView.setAdapter(mMsgListAdapter);
         mMsgListView.setItemsCanFocus(false);
-        mMsgListView.setVisibility(View.VISIBLE);
+        mMsgListView.setVisibility(mSendDiscreetMode ? View.INVISIBLE : View.VISIBLE);
         mMsgListView.setOnCreateContextMenuListener(mMsgListMenuCreateListener);
         mMsgListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -4106,6 +3973,8 @@ public class ComposeMessageActivity extends Activity
             // them back once the recipient list has settled.
             removeRecipientsListeners();
 
+            // strip unicode chars before sending (if applicable)
+            mWorkingMessage.setText(stripUnicodeIfRequested(mWorkingMessage.getText()));
             mWorkingMessage.send(mDebugRecipients);
 
             mSentMessage = true;
@@ -4115,7 +3984,7 @@ public class ComposeMessageActivity extends Activity
             mScrollOnSend = true;   // in the next onQueryComplete, scroll the list to the end.
         }
         // But bail out if we are supposed to exit after the message is sent.
-        if (mExitOnSent) {
+        if (mSendDiscreetMode) {
             finish();
         }
     }
@@ -4222,7 +4091,12 @@ public class ComposeMessageActivity extends Activity
                     ContactList.getByNumbers(recipients,
                             false /* don't block */, true /* replace number */), false);
             addRecipientsListeners();
-            mExitOnSent = bundle.getBoolean("exit_on_sent", false);
+            mSendDiscreetMode = bundle.getBoolean(KEY_EXIT_ON_SENT, false);
+            mForwardMessageMode = bundle.getBoolean(KEY_FORWARDED_MESSAGE, false);
+
+            if (mSendDiscreetMode) {
+                mMsgListView.setVisibility(View.INVISIBLE);
+            }
             mWorkingMessage.readStateFromBundle(bundle);
 
             return;
@@ -4256,7 +4130,11 @@ public class ComposeMessageActivity extends Activity
         addRecipientsListeners();
         updateThreadIdIfRunning();
 
-        mExitOnSent = intent.getBooleanExtra("exit_on_sent", false);
+        mSendDiscreetMode = intent.getBooleanExtra(KEY_EXIT_ON_SENT, false);
+        mForwardMessageMode = intent.getBooleanExtra(KEY_FORWARDED_MESSAGE, false);
+        if (mSendDiscreetMode) {
+            mMsgListView.setVisibility(View.INVISIBLE);
+        }
         if (intent.hasExtra("sms_body")) {
             mWorkingMessage.setText(intent.getStringExtra("sms_body"));
         }
@@ -4998,6 +4876,13 @@ public class ComposeMessageActivity extends Activity
         getLoaderManager().restartLoader(LOAD_TEMPLATES, null, this);
     }
 
+    private CharSequence stripUnicodeIfRequested(CharSequence text) {
+        if (mUnicodeFilter != null) {
+            text = mUnicodeFilter.filter(text);
+        }
+        return text;
+    }
+
     @Override
     public void onGesturePerformed(GestureOverlayView overlay, Gesture gesture) {
         ArrayList<Prediction> predictions = mLibrary.recognize(gesture);
@@ -5084,17 +4969,5 @@ public class ComposeMessageActivity extends Activity
                 return builder.create();
         }
         return super.onCreateDialog(id, args);
-    }
-
-    void updateEasySelector() {
-        SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences((Context) ComposeMessageActivity.this);
-        LinearLayout mEasySelector = (LinearLayout) findViewById(R.id.button_multi_selection);
-        if (mEasySelector == null) return;
-        if (prefs.getBoolean("pref_easy_selector", false) == true) {
-            mEasySelector.setVisibility(View.VISIBLE);
-        } else {
-            mEasySelector.setVisibility(View.GONE);
-        }
     }
 }

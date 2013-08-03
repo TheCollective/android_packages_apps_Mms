@@ -13,23 +13,9 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" >
-
-    <ListView
-        android:id="@android:id/list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-    </ListView>
-
-    <TextView
-        android:id="@+id/empty"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:text="@string/template_not_present_error"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-</RelativeLayout>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <plurals name="template_confirm_delete_conversation">
+        <item quantity="one">One template will be deleted.</item>
+        <item quantity="other"><xliff:g id="number" example="15">%1$s</xliff:g> templates will be deleted.</item>
+    </plurals>
+</resources>
