@@ -777,6 +777,12 @@
     <!-- In message list items, this string builds the timestamp line when the message is in a group [CHAR LIMIT=NONE] -->
     <string name="message_timestamp_format"><xliff:g id="string" example="Fred Flinstone">%1$s</xliff:g>\u0020-\u0020<xliff:g id="string" example="9:39AM">%2$s</xliff:g></string>
 
+    <!-- Multi Contact selector -->
+    <string name="pref_multi_select">Easy Selector</string>
+    <string name="pref_multi_select_summary">Select multiple contacts using a checkbox</string>
+    <string name="add_recipients">Add recipients</string>
+    <string name="add_recipients_positive_button">Add</string>
+
     <!-- Message options - Add SMS to calendar -->
     <string name="menu_add_to_calendar">Add to calendar</string>
 
