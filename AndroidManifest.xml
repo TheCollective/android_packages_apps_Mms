@@ -52,9 +52,9 @@
 
     <!-- Grant permission to system apps to access receiver -->
     <permission android:name="android.permission.MMS_PUSH"
-            android:protectionLevel="signatureOrSystem"
-            android:label="@string/label_mms_push"
-            android:description="@string/desc_mms_push"/>
+                android:protectionLevel="signatureOrSystem"
+                android:label="@string/label_mms_push"
+                android:description="@string/desc_mms_push"/>
     <uses-permission android:name="android.permission.MMS_PUSH"/>
 
     <application android:name="MmsApp"
@@ -171,6 +171,11 @@
         <activity android:name=".ui.SlideshowEditActivity"
             android:theme="@style/MmsHoloTheme"
             android:label="@string/edit_slideshow_activity" />
+
+        <activity android:name=".ui.AddRecipientsList"
+            android:label="@string/add_recipients"
+            android:theme="@style/MmsHoloTheme">
+        </activity>
 
         <activity android:name=".ui.RecipientListActivity"
             android:theme="@style/MmsHoloTheme"
