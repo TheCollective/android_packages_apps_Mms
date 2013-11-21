@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2008 Esmertec AG.
  * Copyright (C) 2008 The Android Open Source Project
+ * QuickMessage Copyright (C) 2012 The CyanogenMod Project (DvTonder)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +65,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.android.mms.LogTag;
-import com.android.mms.MmsConfig;
 import com.android.mms.R;
 import com.android.mms.data.Contact;
 import com.android.mms.data.Conversation;
@@ -807,9 +807,6 @@ public class MessagingNotification {
             Bitmap attachmentBitmap,
             Contact contact,
             int attachmentType) {
-        if (AddressUtils.isSuppressedSprintVVM(context, address)) {
-            return null;
-        }
         Intent clickIntent = ComposeMessageActivity.createIntent(context, threadId);
         clickIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -821,6 +818,7 @@ public class MessagingNotification {
                 0, senderInfo.length() - 2);
         CharSequence ticker = buildTickerMessage(
                 context, address, subject, message);
+
         return new NotificationInfo(isSms,
                 clickIntent, message, subject, ticker, timeMillis,
                 senderInfoName, attachmentBitmap, contact, attachmentType, threadId);
@@ -978,12 +976,12 @@ public class MessagingNotification {
 
         if (isNew) {
             boolean vibrate = false;
-
             if (sp.contains(MessagingPreferenceActivity.NOTIFICATION_VIBRATE)) {
                 // The most recent change to the vibrate preference is to store a boolean
                 // value in NOTIFICATION_VIBRATE. If prefs contain that preference, use that
                 // first.
-                vibrate = sp.getBoolean(MessagingPreferenceActivity.NOTIFICATION_VIBRATE, false);
+                vibrate = sp.getBoolean(MessagingPreferenceActivity.NOTIFICATION_VIBRATE,
+                        false);
             } else if (sp.contains(MessagingPreferenceActivity.NOTIFICATION_VIBRATE_WHEN)) {
                 // This is to support the pre-JellyBean MR1.1 version of vibrate preferences
                 // when vibrate was a tri-state setting. As soon as the user opens the Messaging
@@ -993,20 +991,8 @@ public class MessagingNotification {
                         sp.getString(MessagingPreferenceActivity.NOTIFICATION_VIBRATE_WHEN, null);
                 vibrate = "always".equals(vibrateWhen);
             }
-
             if (vibrate) {
-                String pattern = sp.getString(
-                        MessagingPreferenceActivity.NOTIFICATION_VIBRATE_PATTERN, "0,1200");
-                if ("custom".equals(pattern)) {
-                    pattern = sp.getString(
-                            MessagingPreferenceActivity.NOTIFICATION_VIBRATE_PATTERN_CUSTOM, "0,1200");
-                }
-
-                if (!TextUtils.isEmpty(pattern)) {
-                    noti.setVibrate(parseVibratePattern(pattern));
-                } else {
-                    defaults |= Notification.DEFAULT_VIBRATE;
-                }
+                defaults |= Notification.DEFAULT_VIBRATE;
             }
 
             String ringtoneStr = sp.getString(MessagingPreferenceActivity.NOTIFICATION_RINGTONE,
@@ -1071,7 +1057,7 @@ public class MessagingNotification {
                 // Add the Call action
                 CharSequence callText = context.getText(R.string.menu_call);
                 Intent callIntent = new Intent(Intent.ACTION_CALL);
-                callIntent.setData(mostRecentNotification.mSender.getPhoneUri());
+                callIntent.setData(mostRecentNotification.mSender.getPhoneUri(true));
                 PendingIntent callPendingIntent = PendingIntent.getActivity(context, 0, callIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT);
                 noti.addAction(R.drawable.ic_menu_call, callText, callPendingIntent);
@@ -1535,37 +1521,5 @@ public class MessagingNotification {
         } finally {
             cursor.close();
         }
-    }
-
-    // Parse the user provided custom vibrate pattern into a long[]
-    public static long[] parseVibratePattern(String stringPattern) {
-        ArrayList<Long> arrayListPattern = new ArrayList<Long>();
-        Long l;
-        String[] splitPattern = stringPattern.split(",");
-        int VIBRATE_PATTERN_MAX_SECONDS = 60000;
-        int VIBRATE_PATTERN_MAX_PATTERN = 100;
-
-        for (int i = 0; i < splitPattern.length; i++) {
-            try {
-                l = Long.parseLong(splitPattern[i].trim());
-            } catch (NumberFormatException e) {
-                return null;
-            }
-            if (l > VIBRATE_PATTERN_MAX_SECONDS) {
-                return null;
-            }
-            arrayListPattern.add(l);
-        }
-
-        int size = arrayListPattern.size();
-        if (size > 0 && size < VIBRATE_PATTERN_MAX_PATTERN) {
-            long[] pattern = new long[size];
-            for (int i = 0; i < pattern.length; i++) {
-                pattern[i] = arrayListPattern.get(i);
-            }
-            return pattern;
-        }
-
-        return null;
     }
 }

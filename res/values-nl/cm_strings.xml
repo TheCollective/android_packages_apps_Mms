@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2012-2013 The CyanogenMod Project
+<!--
+     Copyright (C) 2012-2013 The CyanogenMod Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -32,24 +33,13 @@
     <string name="template_ctx_menu_title">Acties</string>
     <string name="template_list_title">Sjablonen</string>
     <string name="template_new_title">Nieuw sjabloon</string>
-    <string name="template_insert">Sjabloon invoeren</string>
+    <string name="template_insert">Sjabloon invoegen</string>
     <string name="template_gesture_draw">Teken een gebaar in onderstaande ruimte</string>
-    <string name="template_not_present_error">U heeft nog geen sjabloon</string>
+    <string name="template_not_present_error">Geen sjablonen ingesteld</string>
     <string name="template_not_present_error_title">Fout</string>
     <string name="template_select">Sjabloon selecteren</string>
-    <string name="template_cancel_confirm_title">Let op</string>
-    <string name="template_cancel_confirm_text">Weet u zeker dat u wilt annuleren?</string>
     <string name="gestures_already_present">Let op: een soortgelijk gebaar wordt al gebruikt</string>
-    <string name="pref_title_mms_notification_vibrate_pattern">Trilpatroon</string>
-    <string name="pref_summary_mms_notification_vibrate_pattern">Trilpatroon wijzigen</string>
-    <string name="pref_title_mms_notification_vibrate_call">Trillen tijdens bellen</string>
-    <string name="pref_summary_mms_notification_vibrate_call">Trillen tijdens het bellen toestaan</string>
-    <string name="pref_title_mms_notification_vibrate_custom">Aangepast trilpatroon</string>
-    <string name="pref_text_mms_notification_vibrate_custom">Indeling uit/aan in miliseconden: uit, aan, uit, aan, enz.</string>
     <string name="pref_extra_settings">Meer\u2026</string>
-    <string name="pref_title_enable_emojis">Emoji</string>
-    <string name="pref_summary_enable_emojis">Unicode-emoji\'s, 471 leuke smiley\'s, inschakelen</string>
-    <string name="menu_insert_emoji">Emoji invoegen</string>
     <string name="pref_title_mms_full_timestamp">Volledige tijdsaanduiding</string>
     <string name="pref_summary_mms_full_timestamp">Datum en tijd tonen in tijdsaanduidingen</string>
     <string name="pref_title_mms_use_sent_timestamp">Oorspronkelijke tijdsaanduiding</string>
@@ -82,11 +72,33 @@
     <string name="notification_multiple_title_privacy_mode">Nieuwe berichten</string>
     <string name="notification_multiple_text_privacy_mode"><xliff:g id="number" example="3">%1$s</xliff:g> ongelezen berichten</string>
     <string name="notification_ticker_privacy_mode">Nieuw bericht ontvangen</string>
-    <string name="menu_insert_contact_info">Contactgegevens invoegen</string>
-    <string name="cannot_find_contact">Kan gegevens van gekozen contact niet invoegen</string>
-    <string name="insert_contact_info_positive_button">Invoegen</string>
     <string name="pref_title_unicode_stripping">Unicode-tekens omzetten</string>
     <string name="pref_unicode_stripping_leave_intact">Tekens intact laten</string>
     <string name="pref_unicode_stripping_non_encodable">Niet-encodeerbare tekens omzetten</string>
     <string name="pref_unicode_stripping_all">Alle Unicode-tekens omzetten</string>
+    <string name="template_confirm_dialog_title">Verwijderen?</string>
+    <string name="select_template">Sjablonen selecteren</string>
+    <string name="blacklist_title">Zwarte lijst</string>
+    <string name="blacklist_summary_disabled">Uitgeschakeld</string>
+    <string name="blacklist_summary">Inkomende berichten van telefoonnummers op de zwarte lijst worden geblokkeerd</string>
+    <string name="blacklist_notification">Bericht van %s geblokkeerd</string>
+    <string name="blacklist_notification_private_number">Bericht van afgeschermd nummer geblokkeerd</string>
+    <string name="blacklist_notification_list_private">Afgeschermd</string>
+    <string name="blacklist_notification_unknown_number">Bericht van onbekend nummer %s geblokkeerd</string>
+    <string name="blacklist_notification_multiple"><xliff:g id="count">%d</xliff:g> berichten geblokkeerd</string>
+    <string name="unblock_number">Deblokkeren</string>
+    <string name="add_to_blacklist">Toevoegen aan zwarte lijst</string>
+    <string name="add_to_blacklist_message">Berichten van %s worden geblokkeerd</string>
+    <string name="alert_dialog_yes">Ja</string>
+    <string name="alert_dialog_no">Nee</string>
+    <string name="select_recipients">Ontvangers kiezen</string>
+    <string name="groups_header">Groepen</string>
+    <string name="no_recipients">Geen contacten gevonden</string>
+    <string name="no_recipients_mobile_only">Geen overeenkomende contacten gevonden. Probeer zonder het filter \'Alleen mobiele nummers\'</string>
+    <string name="menu_done">Gereed</string>
+    <string name="menu_mobile">Alleen mobiele nummers</string>
+    <string name="menu_groups">Groepen tonen</string>
+    <string name="fastscroll_index_groups">GRP</string>
+
+    <!-- CAF strings -->
 </resources>

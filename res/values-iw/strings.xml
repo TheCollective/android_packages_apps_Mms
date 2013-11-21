@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="1503967887341230795">"הודעות"</string>
+    <string name="app_label" msgid="1503967887341230795">"סמס"</string>
     <string name="new_message" msgid="1530369762346003973">"הודעה חדשה"</string>
     <string name="menu_call_back" msgid="7538482331117914146">"התקשר אל <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="menu_send_email" msgid="671366308915241664">"שלח דוא\"ל אל <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -45,7 +45,7 @@
     <string name="expire_on" msgid="4436268382742593921">"תאריך תפוגה: <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="kilobyte" msgid="534782148965716631">"KB"</string>
     <string name="undelivered_msg_dialog_title" msgid="7479433403599785755">"הודעה שלא נמסרה"</string>
-    <string name="undelivered_msg_dialog_body" msgid="4789268239627694551">"לא ניתן היה לשלוח הודעה זו."\n"נעשה ניסיון: <xliff:g id="MESSAGE">%s</xliff:g>."</string>
+    <string name="undelivered_msg_dialog_body" msgid="4789268239627694551">"לא ניתן היה לשלוח הודעה זו.\nנעשה ניסיון: <xliff:g id="MESSAGE">%s</xliff:g>."</string>
     <string name="undelivered_sms_dialog_body" msgid="4203703285563450868">"לא ניתן לשלוח את ההודעה."</string>
     <string name="delete_thread" msgid="757258847736632791">"מחק שרשור"</string>
     <string name="menu_forward" msgid="9026858380050046756">"העבר"</string>
@@ -86,6 +86,8 @@
     <string name="all_threads" msgid="2663426830306307194">"כל השרשורים"</string>
     <string name="type_to_compose_text_enter_to_send" msgid="3539985471008581265">"הקלד הודעה"</string>
     <string name="open_keyboard_to_compose_message" msgid="7860109685511253191">"פתח מקלדת להקלדת הודעה"</string>
+    <string name="sending_disabled_not_default_app" msgid="6685337318181265136">"השליחה מושבתת"</string>
+    <string name="compose_disabled_toast" msgid="1838175321052707875">"לא ניתן לכתוב. זו אינה האפליקציה המוגדרת כברירת מחדל עבור SMS."</string>
     <string name="compressing" msgid="1961357529661045180">"תמונה גדולה מדי. דוחס..."</string>
     <string name="unsupported_media_format" msgid="1350489690977363764">"פורמט <xliff:g id="NAME">%1$s</xliff:g> שאינו נתמך."</string>
     <string name="select_different_media" msgid="6241623357299382183">"בחר <xliff:g id="NAME">%1$s</xliff:g> שונה."</string>
@@ -156,6 +158,10 @@
     <string name="pref_mms_settings_title" msgid="55618772118264355">"הודעות מולטימדיה (MMS)"</string>
     <string name="pref_sms_settings_title" msgid="5173078369851066881">"הודעות טקסט (SMS)"</string>
     <string name="pref_sms_storage_title" msgid="9001233319190616445">"אחסון"</string>
+    <string name="pref_title_sms_disabled" msgid="1441894740130104326">"SMS מושבת"</string>
+    <string name="pref_summary_sms_disabled" msgid="8975773722051230744">"גע כדי להפוך את \'העברת הודעות\' לאפליקציית ברירת המחדל ל-SMS"</string>
+    <string name="pref_title_sms_enabled" msgid="1857849790200375277">"SMS פועל"</string>
+    <string name="pref_summary_sms_enabled" msgid="2106125420361911250">"גע כדי לשנות את אפליקציית ברירת המחדל ל-SMS"</string>
     <string name="pref_summary_manage_sim_messages" msgid="4141349892597640864">"נהל הודעות המאוחסנות בכרטיס ה-SIM"</string>
     <string name="pref_summary_mms_delivery_reports" msgid="4874657984217756112">"בקש דוח מסירה לכל הודעה שאתה שולח"</string>
     <string name="pref_summary_mms_read_reports" msgid="2748323864008907440">"בקש דוח קריאה לכל הודעה שאתה שולח"</string>
@@ -221,7 +227,7 @@
     <string name="menu_delete_messages" msgid="2610286783513247420">"מחק הודעות"</string>
     <string name="menu_lock" msgid="7603793126077557472">"נעל"</string>
     <string name="menu_unlock" msgid="6662865558677424039">"בטל נעילה"</string>
-    <string name="sim_copy_to_phone_memory" product="tablet" msgid="3721000641648594602">"העתק לזיכרון של הטבלט"</string>
+    <string name="sim_copy_to_phone_memory" product="tablet" msgid="3721000641648594602">"העתק לזיכרון של הטאבלט"</string>
     <string name="sim_copy_to_phone_memory" product="default" msgid="5895767417844881971">"העתק לזיכרון הטלפון"</string>
     <string name="sim_delete" msgid="610790510655316922">"מחק"</string>
     <string name="sim_manage_messages_title" msgid="3989147182100584333">"הודעות טקסט בכרטיס SIM"</string>
@@ -274,6 +280,7 @@
     <string name="message_send_failed_title" msgid="3469894907399046372">"ההודעה לא נשלחה"</string>
     <string name="message_failed_body" msgid="3421296112073915245">"גע כדי לבדוק את ההודעה ונסה שוב."</string>
     <string name="download_later" msgid="5531365714424360903">"לא ניתן להוריד כרגע. נסה שוב מאוחר יותר."</string>
+    <string name="no_apn" msgid="505932916503312015">"לא צוין APN במכשיר."</string>
     <string name="select_audio" msgid="3528161449756771832">"בחר קובץ אודיו"</string>
     <string name="copy_to_sdcard" msgid="757028609638184856">"שמור את הקובץ המצורף"</string>
     <string name="copy_to_sdcard_success" msgid="7948625615155992014">"הקובץ המצורף נשמר."</string>
@@ -281,7 +288,6 @@
     <string name="save_ringtone" msgid="2310157075045201051">"שמור כצלצול"</string>
     <string name="saved_ringtone" msgid="3847363932276708626">"הרינגטון נשמר."</string>
     <string name="saved_ringtone_fail" msgid="4778500070919251116">"לא ניתן היה לשמור את הצלצול."</string>
-    <string name="menu_insert_smiley" msgid="4964504393061025071">"הוסף סמיילי"</string>
     <string name="menu_group_participants" msgid="4288356090262299071">"משתתפי קבוצה"</string>
     <string name="select_link_title" msgid="3371818607625768447">"בחר פעולה"</string>
     <string name="slide_number" msgid="1923958526266726635">"שקף <xliff:g id="NUMBER">%s</xliff:g>"</string>
@@ -298,9 +304,9 @@
     <string name="edit_slide_activity" msgid="8752829671778696983">"ערוך שקף"</string>
     <string name="slideshow_activity" msgid="5658249461317434432">"מצגת"</string>
     <string name="class_0_message_activity" msgid="6631339964159861048">"הודעה ברמה 0"</string>
-    <string name="search_label" msgid="6042598929386174964">"הודעות"</string>
+    <string name="search_label" msgid="6042598929386174964">"סמס"</string>
     <string name="search_hint" msgid="7273727663577472044">"חפש בהעברת הודעות"</string>
-    <string name="search" msgid="7560238620274735199">"הודעות"</string>
+    <string name="search" msgid="7560238620274735199">"סמס"</string>
     <string name="search_setting_description" msgid="4104004595086437572">"טקסט בהודעות"</string>
     <string name="search_empty" msgid="2109551478056039278">"אין התאמות."</string>
   <plurals name="search_results_title">
@@ -311,7 +317,7 @@
     <string name="confirm_clear_search_title" msgid="8510295993632032904">"נקה"</string>
     <string name="confirm_clear_search_text" msgid="8731877031837077478">"היסטוריית החיפושים תנוקה."</string>
     <string name="pref_mms_clear_search_history_title" msgid="6159758850628148164">"נקה את היסטוריית החיפושים"</string>
-    <string name="pref_mms_clear_search_history_summary" msgid="7960005384066460035">"נקה את החיפושים הקודמים של \"הודעות\" כדי שלא יופיעו בתיבת החיפוש"</string>
+    <string name="pref_mms_clear_search_history_summary" msgid="7960005384066460035">"נקה את החיפושים הקודמים של \'סמס\' כדי שלא יופיעו בתיבה \'חפש\'"</string>
     <string name="save" msgid="6847069284991531310">"שמור"</string>
     <string name="storage_limits_title" msgid="7074684882530693016">"הגבל הודעות"</string>
     <string name="storage_limits_message" msgid="2010501485394745696">"האם להגביל את מספר ההודעות שאתה שומר בכל שיחה?"</string>
@@ -333,7 +339,7 @@
   <plurals name="recipient_count">
     <item quantity="other" msgid="7338580381574463136">"<xliff:g id="NUMBER">%1$s</xliff:g> אנשים"</item>
   </plurals>
-    <string name="disable_notifications_dialog_message" msgid="7644011234972074096">"האם להפסיק התראות כפולות על הודעות טקסט ביישום העברת ההודעות המוגדר כברירת מחדל?"</string>
+    <string name="disable_notifications_dialog_message" msgid="7644011234972074096">"האם להפסיק התראות כפולות על הודעות טקסט באפליקציית העברת ההודעות המוגדרת כברירת מחדל?"</string>
     <string name="view_more_conversations" msgid="7275920132410734671">"הצג שיחות נוספות"</string>
     <string name="attachment_audio" msgid="2867960243300539143">"אודיו"</string>
     <string name="attachment_slideshow" msgid="5867689101881763318">"מצגת"</string>
@@ -342,104 +348,11 @@
     <string name="notification_separator" msgid="2334673105226536422">"  "</string>
     <string name="enumeration_comma" msgid="213598026698964628">", "</string>
     <string name="message_timestamp_format" msgid="4188999027493614617">"<xliff:g id="STRING_0">%1$s</xliff:g> - <xliff:g id="STRING_1">%2$s</xliff:g>"</string>
-
-    <!-- **** CYANOGENMOD ADDITIONS START **** -->
-
-    <!-- Extra Settings: -->
-    <string name="pref_extra_settings">הגדרות נוספות</string>
-
-    <!-- Enable emojis -->
-    <string name="pref_title_enable_emojis">תמיכה ב-Emoji</string>
-    <string name="pref_summary_enable_emojis">אפשר תמיכה ב-Emoji, סט של 471 רגשונים נחמדים</string>
-
-    <!-- Emoji Menu item -->
-    <string name="menu_insert_emoji">הוסף Emoji</string>
-
-    <!-- Settings item for boolean option for SMS Split Counter -->
-    <string name="pref_title_sms_split_counter">מונה פיצולים</string>
-    <!-- Settings item description for boolean SMS Split 160 characters setting -->
-    <string name="pref_summary_sms_split_counter">מוסיף מונה להודעה מפוצלת, לדוג\' (1/2)</string>
-
-    <!-- Sms templates -->
-    <string name="prefs_templates_settings">תבניות SMS</string>
-    <string name="pref_title_templates_manage">תבניות</string>
-    <string name="pref_summary_templates_manage">נהל את תבניות ה-SMS שלך</string>
-    <string name="pref_title_templates_show_gesture">מחווה</string>
-    <string name="pref_summary_templates_show_gesture">הצג קו בעת ציור המחווה</string>
-    <string name="pref_title_template_gestures_sensitivity">רגישות המחווה</string>
-    <string name="template_save">שמור</string>
-    <string name="template_insert_hint">הזן כאן את מלל התבנית</string>
-    <string name="template_empty_text">שדה המלל אינו יכול להשאר ריק</string>
-    <string name="template_explanation">הזן או ערוך את מלל התבנית, באפשרותך לצייר מחוות קיצור שתשוייך לה</string>
-    <string name="template_edit">ערוך</string>
-    <string name="template_delete">מחק</string>
-    <string name="template_ctx_menu_title">פעולות</string>
-    <string name="template_list_title">תבניות</string>
-    <string name="template_new_title">תבנית חדשה</string>
-    <string name="template_insert">הוסף תבנית</string>
-    <string name="template_gesture_draw">צייר את המחווה במרחב שמתחת</string>
-    <string name="template_not_present_error">אין תבניות מוגדרות</string>
-    <string name="template_not_present_error_title">שגיאה</string>
-    <string name="template_select">בחר תבנית</string>
-    <string name="template_cancel_confirm_title">אזהרה</string>
-    <string name="template_cancel_confirm_text">התבנית תמחק. להמשיך?</string>
-    <string name="gestures_already_present">אזהרה: מחווה דומה משוייכת לתבנית אחרת!</string>
-
-    <!-- Change Vibrate pattern/method for message notification -->
-    <string name="pref_title_mms_notification_vibrate_pattern">תבנית רטט</string>
-    <string name="pref_summary_mms_notification_vibrate_pattern">שנה את תבנית הרטט</string>
-    <string name="pref_title_mms_notification_vibrate_call">רטוט בעת שיחה</string>
-    <string name="pref_summary_mms_notification_vibrate_call">אפשר למכשיר לרטוט בזמן שיחה</string>
-    <string name="pref_title_mms_notification_vibrate_custom">תבנית רטט מותאמת אישית</string>
-    <string name="pref_text_mms_notification_vibrate_custom">מבנה: כבוי/פועל במילישניות (כבוי,פועל,כבוי,פועל...)</string>
-
-    <!-- Full timestamps -->
-    <string name="pref_title_mms_full_timestamp">חותם זמן מלא</string>
-    <string name="pref_summary_mms_full_timestamp">הצג גם תאריך וגם שעה בחותמי הזמן של הודעות</string>
-
-    <!-- Which timestamps -->
-    <string name="pref_title_mms_use_sent_timestamp">חותמי זמן מקוריים</string>
-    <string name="pref_summary_mms_use_sent_timestamp">הצג את חותם הזמן של רגע השליחה במקום רגע הקבלה</string>
-
-    <!-- Add menu for 'Add SMS to calendar remind' -->
-    <string name="menu_add_to_calendar">הוסף ליומן</string>
-
-    <!-- Soft Keyboard Type -->
-    <string name="pref_keyboard_emoji">הצג את מקש הרגשונים</string>
-    <string name="pref_keyboard_new_line">הצג את מקש האנטר</string>
-    <string name="pref_keyboard_unknown">לא ידוע, בחר שוב בבקשה</string>
-
-    <!-- Settings item for the soft keyboard picker -->
-    <string name="pref_title_input_type">סוג מקלדת וירטואלית</string>
-
-    <!-- QUICKMESSAGE SUPPORT -->
-    <!-- Preferences -->
-    <string name="pref_quickmessage">תגובה מהירה</string>
-    <string name="pref_quickmessage_title">הצג חלון קופץ</string>
-    <string name="pref_quickmessage_summary">הצג חלון תגובה מהירה קופץ להודעות SMS נכנסות</string>
-    <string name="pref_wake_unlock_title">הער ושחרר מנעילה</string>
-    <string name="pref_wake_unlock_summary">הער את המכשיר ושחרר אותו מנעילתו בקבלת הודעה (במסכי נעילה לא מאובטחים בלבד)</string>
-    <string name="pref_close_all_title">סגור הכל</string>
-    <string name="pref_close_all_summary">כפתור הסגירה סוגר את כל ההודעות הקופצות</string>
-    <string name="pref_dark_theme_title">השתמש בערכת נושא כהה</string>
-    <string name="pref_dark_theme_summary">אם לא מסומן, יעשה שימוש בברירת המחדל הבהירה</string>
-    <string name="message_counter_separator">מתוך</string>
-
-    <!-- QM Dialog box buttons -->
-    <string name="button_close">סגור</string>
-    <string name="button_view">הצג</string>
-    <string name="button_templates">תבניות</string>
-
-    <!-- Hint text in message body field when keyboard is exposed -->
-    <string name="type_to_reply_text_enter_to_send">הקלד כדי להגיב</string>
-
-    <!-- QM Toast -->
-    <string name="toast_sending_message">שולח הודעה</string>
-
-    <!-- QM - Quick reply -->
-    <string name="qm_quick_reply">הגב</string>
-    <string name="qm_mark_read">נקראה</string>
-
-    <!-- **** CYANOGENMOD ADDITIONS END **** -->
-
+    <string name="storage_warning_title" msgid="7124740686325942375">"שטח האחסון בטלפון שלך מלא"</string>
+    <string name="storage_warning_content" msgid="1100367816649962354">"לא תקבל הודעות SMS/MMS חדשות"</string>
+    <string name="label_mms_send_outbox_msg" msgid="3395185162973061099">"התעוררות MMS"</string>
+    <string name="desc_mms_send_outbox_msg" msgid="1837156781311437148">"שולח את כל הודעות ה-MMS מתיבת הדואר היוצא לרשת"</string>
+    <string name="banner_sms_promo_title_initial" msgid="510014388581481569">"\'העברת הודעות\' אינה אפליקציית ה-SMS שלך"</string>
+    <string name="banner_sms_promo_title_application" msgid="8123569785369713254">"<xliff:g id="APPNAME">%s</xliff:g> היא אפליקציית ה-SMS שלך"</string>
+    <string name="banner_sms_promo_message" msgid="3536714414252763826">"ניתן לשנות זאת בהגדרות"</string>
 </resources>
