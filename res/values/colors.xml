@@ -3,7 +3,6 @@
 /*
  * Copyright (C) 2007-2008 Esmertec AG.
  * Copyright (C) 2007-2008 The Android Open Source Project
- * Copyright (C) 2013 The CyanogenMod Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,34 +44,8 @@
     <color name="banner_item_transparent">#00000000</color>
     <color name="banner_item_activated">#670099cc</color>
     <color name="banner_item_selected">#cc0099cc</color>
-    <color name="banner_item_pressed">#67ff3000</color>
+    <color name="banner_item_pressed">#6733b5e5</color>
 
     <color name="text_shadow_color_light">#33000000</color>
     <color name="solid_white">#ffffffff</color>
-
-        <!-- Color of the text for buttons in the action bar  -->
-    <color name="action_bar_button_text_color">#FFFFFF</color>
-
-    <!-- New text colors from layouts to make theme chooser apk easier to theme -->
-    <color name="compose_message_edit_text">#ffff3000</color>
-    <color name="compose_message_text_counter">#cccccccc</color>
-    <color name="actionbar_text">#ccffffff</color>
-    <color name="delete_thread_dialog">#ff4444</color>
-    <color name="delivery_report_header">#ffffff</color>
-    <color name="delivery_report_recipient">#ffffffff</color>
-    <color name="delivery_report_status">#cc0099cc</color>
-    <color name="delivery_report_date">#ffff3000</color>
-    <color name="button_text">#ffff3000</color>
-    <color name="message_received">#ffffff</color>
-    <color name="message_sent">#ffffffff</color>
-    <color name="widget_unread_text">#000000</color>
-    <color name="widget_loading">#ffffff</color>
-
-    <!-- New Background colors from layouts to make theme chooser apk easier to theme -->
-    <color name="background">#00000000</color>
-    <color name="darkgray_backgrounds">#888888</color>
-    <color name="quickmessage_body_dark_bg">#ff1e1e1e</color>
-    <color name="quickmessage_body_light_bg">#fff3f3f3</color>
-    <color name="dividers">#eeeeee</color>
-    <color name="transparent">#00000000</color>
 </resources>
