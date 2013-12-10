@@ -3,6 +3,7 @@
 /*
  * Copyright (C) 2007-2008 Esmertec AG.
  * Copyright (C) 2007-2008 The Android Open Source Project
+ * Copyright (C) 2013 The CyanogenMod Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +35,10 @@
     <color name="unread_bgcolor">#66ff3000</color>
     <color name="read_bgcolor">#00000000</color>
 
-    <color name="widget_sender_text_color_read">#000000</color>
-    <color name="widget_sender_text_color_unread">#000000</color>
-    <color name="widget_subject_text_color_read">#000000</color>
-    <color name="widget_subject_text_color_unread">#000000</color>
+    <color name="widget_sender_text_color_read">#cccccc</color>
+    <color name="widget_sender_text_color_unread">#eeeeee</color>
+    <color name="widget_subject_text_color_read">#cccccc</color>
+    <color name="widget_subject_text_color_unread">#eeeeee</color>
 
     <color name="translucent_white">#ccffffff</color>
 
@@ -48,4 +49,30 @@
 
     <color name="text_shadow_color_light">#33000000</color>
     <color name="solid_white">#ffffffff</color>
+
+        <!-- Color of the text for buttons in the action bar  -->
+    <color name="action_bar_button_text_color">#FFFFFF</color>
+
+    <!-- New text colors from layouts to make theme chooser apk easier to theme -->
+    <color name="compose_message_edit_text">#ffff3000</color>
+    <color name="compose_message_text_counter">#cccccccc</color>
+    <color name="actionbar_text">#ccffffff</color>
+    <color name="delete_thread_dialog">#ff4444</color>
+    <color name="delivery_report_header">#ffffff</color>
+    <color name="delivery_report_recipient">#ffffffff</color>
+    <color name="delivery_report_status">#cc0099cc</color>
+    <color name="delivery_report_date">#ffff3000</color>
+    <color name="button_text">#ffff3000</color>
+    <color name="message_received">#ffffff</color>
+    <color name="message_sent">#ffffffff</color>
+    <color name="widget_unread_text">#777777</color>
+    <color name="widget_loading">#ffffff</color>
+
+    <!-- New Background colors from layouts to make theme chooser apk easier to theme -->
+    <color name="background">#00000000</color>
+    <color name="darkgray_backgrounds">#888888</color>
+    <color name="quickmessage_body_dark_bg">#ff1e1e1e</color>
+    <color name="quickmessage_body_light_bg">#fff3f3f3</color>
+    <color name="dividers">#eeeeee</color>
+    <color name="transparent">#00000000</color>
 </resources>
